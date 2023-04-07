@@ -1,0 +1,94 @@
+﻿@page "/"
+@using System.Linq;
+@using Markdig
+@using OpenAI_API
+@using OpenAI_API.Chat
+@inject OpenAIAPI openAIAPI
+
+<PageTitle>My ChatGPT</PageTitle>
+
+<h4>Welcome to my Chat using OpenAI</h4>
+@if (warningMessage.Length > 0)
+{
+    <div class="alert alert-warning">
+        <strong>Warning!</strong> @warningMessage.
+    </div>
+}
+<div class="row">
+    <EditForm Model=@this>
+        @foreach (var chat in conversation.Messages)
+        {
+            <h5>@chat.Role</h5>
+            @((MarkupString)Markdown.ToHtml(chat.Content))
+        }
+
+        @if (!string.IsNullOrEmpty(stream))
+        {
+            <h5>assistant</h5>
+            @((MarkupString)Markdown.ToHtml(stream))
+        }
+        @if (loading)
+        {
+            <br />
+            <div class="loader"></div>
+            <p>... please wait ...</p>
+        }
+        <hr />
+        <div class="col-sm-8">
+            <InputTextArea type="text" class="form-control" placeholder="Ask me Anything" @bind-Value=next />
+        </div>
+        <br />
+        <div class="col-sm-2">
+            <button class="btn btn-danger" @onclick="OnSearchClick" type="submit">
+                <i class="fas fa-times"></i>Submit
+            </button>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    private Conversation conversation = null!;
+
+    private string warningMessage = "";
+    private string next = "";
+    private string stream = "";
+    private bool loading = false;
+
+    protected override void OnInitialized()
+    {
+        conversation = openAIAPI.Chat.CreateConversation();
+        conversation.AppendSystemMessage("You are the assistant of a software engineer mainly working with .NET and Azure.");
+    }
+
+    public async void OnSearchClick()
+    {
+        try
+        {
+            loading = true;
+            this.StateHasChanged();
+
+            conversation.AppendUserInput(next);
+
+            //await conversation.GetResponseFromChatbotAsync();
+            await conversation.StreamResponseFromChatbotAsync(x =>
+            {
+                stream += x;
+                this.StateHasChanged();
+            });
+
+            // Bug workaround when using StreamResponseFromChatbotAsync - TODO create GitHub issue
+            conversation.Messages.Last().Role = ChatMessageRole.Assistant;
+            stream = "";
+            loading = false;
+        }
+        catch (Exception ex)
+        {
+            warningMessage = ex.Message;
+        }
+        finally
+        {
+            loading = false;
+            this.StateHasChanged();
+        }
+    }
+}
