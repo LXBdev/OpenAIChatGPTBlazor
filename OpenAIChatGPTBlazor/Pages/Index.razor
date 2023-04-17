@@ -35,11 +35,11 @@
         }
         <hr />
         <div class="col-sm-8">
-            <InputTextArea type="text" class="form-control" placeholder="Ask me Anything" @bind-Value=next />
+            <InputTextArea type="text" class="form-control" @onkeydown="@OnCtrlEnter" placeholder="CTRL+Enter to submit search" @bind-Value=next @ref=nextArea />
         </div>
         <br />
         <div class="col-sm-2">
-            <button class="btn btn-danger" @onclick="OnSearchClick" type="submit">
+            <button class="btn btn-danger" @onclick="OnSearchClick" type="submit" disabled=@loading>
                 <i class="fas fa-times"></i>Submit
             </button>
         </div>
@@ -52,7 +52,8 @@
     private string warningMessage = "";
     private string next = "";
     private string stream = "";
-    private bool loading = false;
+    private bool loading = true;
+    private InputTextArea nextArea = null!;
 
     protected override void OnInitialized()
     {
@@ -60,7 +61,29 @@
         conversation.AppendSystemMessage("You are the assistant of a software engineer mainly working with .NET and Azure.");
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && nextArea.Element != null){
+            loading = false;
+            this.StateHasChanged();
+            await nextArea.Element.Value.FocusAsync();
+        }
+    }
+
     public async void OnSearchClick()
+    {
+        await RunSearch();
+    }
+    public async void OnCtrlEnter(KeyboardEventArgs e)
+    {
+        if (e.Code == "Enter" && e.CtrlKey)
+        {
+            await RunSearch();
+            await nextArea.Element.Value.SelectAsync();
+        }
+    }
+
+    public async Task RunSearch()
     {
         try
         {
@@ -72,12 +95,14 @@
             //await conversation.GetResponseFromChatbotAsync();
             await conversation.StreamResponseFromChatbotAsync(x =>
             {
+                // We collect response as it comes in and display it immediately
                 stream += x;
                 this.StateHasChanged();
             });
 
             // Bug workaround when using StreamResponseFromChatbotAsync - TODO create GitHub issue
             conversation.Messages.Last().Role = ChatMessageRole.Assistant;
+            // Now that the message is part of the conversation, we remove our temporary copy
             stream = "";
             loading = false;
             warningMessage = string.Empty;
