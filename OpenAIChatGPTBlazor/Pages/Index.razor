@@ -35,7 +35,7 @@
         }
         <hr />
         <div class="col-sm-8">
-            <InputTextArea type="text" class="form-control" @onkeydown="@OnCtrlEnter" placeholder="CTRL+Enter to submit search" @bind-Value=next @ref=nextArea />
+            <InputTextArea type="text" class="form-control" @oninput="@OnNextInput" @onkeydown="@OnNextKeydown" placeholder="CTRL+Enter to submit search" @bind-Value=next @ref=nextArea />
         </div>
         <br />
         <div class="col-sm-2">
@@ -74,7 +74,13 @@
     {
         await RunSearch();
     }
-    public async void OnCtrlEnter(KeyboardEventArgs e)
+
+    private void OnNextInput(ChangeEventArgs e)
+    {
+        next = e.Value?.ToString() ?? string.Empty;
+    }
+
+    public async void OnNextKeydown(KeyboardEventArgs e)
     {
         if (e.Code == "Enter" && e.CtrlKey)
         {
