@@ -35,7 +35,12 @@
         }
         <hr />
         <div class="col-sm-8">
-            <InputTextArea type="text" class="form-control" @oninput="@OnNextInput" @onkeydown="@OnNextKeydown" placeholder="CTRL+Enter to submit search" @bind-Value=next @ref=nextArea />
+            <textarea  type="text" class="form-control"
+                placeholder="CTRL+Enter to submit search"
+                @bind="next"  @bind:event="oninput" 
+                @ref=nextArea
+                @onkeydown="@OnNextKeydown"
+                />
         </div>
         <br />
         <div class="col-sm-2">
@@ -53,7 +58,7 @@
     private string next = "";
     private string stream = "";
     private bool loading = true;
-    private InputTextArea nextArea = null!;
+    private ElementReference nextArea;
 
     protected override void OnInitialized()
     {
@@ -63,21 +68,16 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && nextArea.Element != null){
+        if (firstRender){
             loading = false;
             this.StateHasChanged();
-            await nextArea.Element.Value.FocusAsync();
+            await nextArea.FocusAsync();
         }
     }
 
     public async void OnSearchClick()
     {
         await RunSearch();
-    }
-
-    private void OnNextInput(ChangeEventArgs e)
-    {
-        next = e.Value?.ToString() ?? string.Empty;
     }
 
     public async void OnNextKeydown(KeyboardEventArgs e)
