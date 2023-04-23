@@ -58,9 +58,9 @@
             }
         };
 
-    private string warningMessage = "";
-    private string next = "";
-    private string stream = "";
+    private string warningMessage = string.Empty;
+    private string next = string.Empty;
+    private string stream = string.Empty;
     private bool loading = true;
     private ElementReference nextArea;
 
@@ -110,9 +110,10 @@
 
             chat.Messages.Add(new ChatMessage(ChatRole.Assistant, stream));
 
-            stream = "";
             loading = false;
+            stream = string.Empty;
             warningMessage = string.Empty;
+            next = string.Empty;
         }
         catch (Exception ex)
         {
