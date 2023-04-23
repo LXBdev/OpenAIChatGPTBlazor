@@ -1,9 +1,11 @@
 ﻿@page "/"
 @using System.Linq;
+@using Azure
+@using Azure.AI.OpenAI
 @using Markdig
-@using OpenAI_API
-@using OpenAI_API.Chat
-@inject OpenAIAPI openAIAPI
+@using System.Globalization
+@inject IConfiguration configuration
+@inject OpenAIClient openAIClient
 
 <PageTitle>My ChatGPT</PageTitle>
 
@@ -15,7 +17,7 @@
     </div>
 }
 <div class="row">
-    @foreach (var chat in conversation.Messages)
+    @foreach (var chat in chat.Messages)
     {
         <h5>@chat.Role</h5>
         @((MarkupString)Markdown.ToHtml(chat.Content))
@@ -49,19 +51,18 @@
 </div>
 
 @code {
-    private Conversation conversation = null!;
+    private ChatCompletionsOptions chat = new ChatCompletionsOptions
+        {
+            Messages = { new Azure.AI.OpenAI.ChatMessage(ChatRole.System,
+            $"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.")
+            }
+        };
 
     private string warningMessage = "";
     private string next = "";
     private string stream = "";
     private bool loading = true;
     private ElementReference nextArea;
-
-    protected override void OnInitialized()
-    {
-        conversation = openAIAPI.Chat.CreateConversation();
-        conversation.AppendSystemMessage("You are the assistant of a software engineer mainly working with .NET and Azure.");
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -93,19 +94,22 @@
             loading = true;
             this.StateHasChanged();
 
-            conversation.AppendUserInput(next);
+            chat.Messages.Add(new Azure.AI.OpenAI.ChatMessage(ChatRole.User, next));
 
-            //await conversation.GetResponseFromChatbotAsync();
-            await conversation.StreamResponseFromChatbotAsync(x =>
+            var res = await openAIClient.GetChatCompletionsStreamingAsync(configuration["OpenAI:DeploymentId"], chat);
+
+            await foreach (var choice in res.Value.GetChoicesStreaming())
             {
-                // We collect response as it comes in and display it immediately
-                stream += x;
-                this.StateHasChanged();
-            });
+                await foreach (var msg in choice.GetMessageStreaming())
+                {
+                    // We collect response as it comes in and display it immediately
+                    stream += msg.Content;
+                    this.StateHasChanged();
+                }
+            }
 
-            // Bug workaround when using StreamResponseFromChatbotAsync - TODO create GitHub issue
-            conversation.Messages.Last().Role = ChatMessageRole.Assistant;
-            // Now that the message is part of the conversation, we remove our temporary copy
+            chat.Messages.Add(new ChatMessage(ChatRole.Assistant, stream));
+
             stream = "";
             loading = false;
             warningMessage = string.Empty;
