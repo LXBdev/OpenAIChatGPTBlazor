@@ -15,40 +15,37 @@
     </div>
 }
 <div class="row">
-    <EditForm Model=@this>
-        @foreach (var chat in conversation.Messages)
-        {
-            <h5>@chat.Role</h5>
-            @((MarkupString)Markdown.ToHtml(chat.Content))
-        }
+    @foreach (var chat in conversation.Messages)
+    {
+        <h5>@chat.Role</h5>
+        @((MarkupString)Markdown.ToHtml(chat.Content))
+    }
 
-        @if (!string.IsNullOrEmpty(stream))
-        {
-            <h5>assistant</h5>
-            @((MarkupString)Markdown.ToHtml(stream))
-        }
-        @if (loading)
-        {
-            <br />
-            <div class="loader"></div>
-            <p>... please wait ...</p>
-        }
-        <hr />
-        <div class="col-sm-8">
-            <textarea  type="text" class="form-control"
-                placeholder="CTRL+Enter to submit search"
-                @bind="next"  @bind:event="oninput" 
-                @ref=nextArea
-                @onkeydown="@OnNextKeydown"
-                />
-        </div>
+    @if (!string.IsNullOrEmpty(stream))
+    {
+        <h5>assistant</h5>
+        @((MarkupString)Markdown.ToHtml(stream))
+    }
+    @if (loading)
+    {
         <br />
-        <div class="col-sm-2">
-            <button class="btn btn-danger" @onclick="OnSearchClick" type="submit" disabled=@loading>
-                <i class="fas fa-times"></i>Submit
-            </button>
-        </div>
-    </EditForm>
+        <div class="loader"></div>
+        <p>... please wait ...</p>
+    }
+    <hr />
+    <div class="col-sm-8">
+        <textarea type="text" class="form-control"
+                  placeholder="CTRL+Enter to submit search"
+                  @bind="next" @bind:event="oninput"
+                  @ref=nextArea
+                  @onkeydown="@OnNextKeydown" />
+    </div>
+    <br />
+    <div class="col-sm-2">
+        <button class="btn btn-danger" @onclick="OnSearchClick" type="submit" disabled=@loading>
+            <i class="fas fa-times"></i>Submit
+        </button>
+    </div>
 </div>
 
 @code {
@@ -68,7 +65,8 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender){
+        if (firstRender)
+        {
             loading = false;
             this.StateHasChanged();
             await nextArea.FocusAsync();
