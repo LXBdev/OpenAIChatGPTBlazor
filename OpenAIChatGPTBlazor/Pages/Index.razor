@@ -54,7 +54,7 @@
     private ChatCompletionsOptions chat = new ChatCompletionsOptions
         {
             Messages = { new Azure.AI.OpenAI.ChatMessage(ChatRole.System,
-            $"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.")
+            $"You speak like a pirate to a child. You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.")
             }
         };
 
@@ -93,9 +93,10 @@
         {
             loading = true;
             this.StateHasChanged();
-            next = string.Empty;
 
             chat.Messages.Add(new Azure.AI.OpenAI.ChatMessage(ChatRole.User, next));
+
+            next = string.Empty;
 
             var res = await openAIClient.GetChatCompletionsStreamingAsync(configuration["OpenAI:DeploymentId"], chat);
 
