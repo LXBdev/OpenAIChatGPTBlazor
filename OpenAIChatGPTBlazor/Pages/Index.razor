@@ -93,6 +93,7 @@
         {
             loading = true;
             this.StateHasChanged();
+            next = string.Empty;
 
             chat.Messages.Add(new Azure.AI.OpenAI.ChatMessage(ChatRole.User, next));
 
@@ -113,7 +114,6 @@
             loading = false;
             stream = string.Empty;
             warningMessage = string.Empty;
-            next = string.Empty;
         }
         catch (Exception ex)
         {
