@@ -1,129 +1,132 @@
 ﻿@page "/"
-@using System.Linq;
-@using Azure
 @using Azure.AI.OpenAI
 @using Markdig
 @using System.Globalization
-@inject IConfiguration configuration
-@inject OpenAIClient openAIClient
+@inject IConfiguration Configuration
+@inject OpenAIClient OpenAiClient
 
 <PageTitle>My ChatGPT</PageTitle>
 
 <h4>Welcome to my Chat using OpenAI</h4>
-@if (warningMessage.Length > 0)
+@if (_warningMessage.Length > 0)
 {
     <div class="alert alert-warning">
-        <strong>Warning!</strong> @warningMessage.
+        <strong>Warning!</strong> @_warningMessage.
     </div>
 }
 <div class="row">
-    @foreach (var chat in chat.Messages)
+    @foreach (var chatMessage in _chat.Messages)
     {
-        <h5>@chat.Role</h5>
-        @((MarkupString)Markdown.ToHtml(chat.Content))
+        <h5>@chatMessage.Role</h5>
+        @((MarkupString)Markdown.ToHtml(chatMessage.Content))
     }
 
-    @if (!string.IsNullOrEmpty(stream))
+    @if (!string.IsNullOrEmpty(_stream))
     {
         <h5>assistant</h5>
-        @((MarkupString)Markdown.ToHtml(stream))
+        @((MarkupString)Markdown.ToHtml(_stream))
     }
-    @if (loading)
+    @if (_loading)
     {
-        <br />
+        <br/>
         <div class="loader"></div>
         <p>... please wait ...</p>
     }
-    <hr />
+    <hr/>
     <div class="col-sm-8">
         <textarea type="text" class="form-control"
                   placeholder="CTRL+Enter to submit search"
-                  @bind="next" @bind:event="oninput"
-                  @ref=nextArea
-                  @onkeydown="@OnNextKeydown" />
+                  @bind="_next" @bind:event="oninput"
+                  @ref=_nextArea
+                  @onkeydown="@OnNextKeydown">
+        </textarea>
     </div>
-    <br />
+    <br/>
     <div class="col-sm-2">
-        <button class="btn btn-danger" @onclick="OnSearchClick" type="submit" disabled=@loading>
+        <button class="btn btn-danger" @onclick="OnSearchClick" type="submit" disabled=@_loading>
             <i class="fas fa-times"></i>Submit
         </button>
     </div>
 </div>
 
 @code {
-    private ChatCompletionsOptions chat = new ChatCompletionsOptions
-        {
-            Messages = { new Azure.AI.OpenAI.ChatMessage(ChatRole.System,
-            $"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.")
-            }
-        };
 
-    private string warningMessage = string.Empty;
-    private string next = string.Empty;
-    private string stream = string.Empty;
-    private bool loading = true;
-    private ElementReference nextArea;
+    private readonly ChatCompletionsOptions _chat = new ChatCompletionsOptions
+    {
+        Messages =
+        {
+            new ChatMessage(ChatRole.System,
+                $"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.")
+        }
+    };
+
+    private string _warningMessage = string.Empty;
+    private string _next = string.Empty;
+    private string _stream = string.Empty;
+    private bool _loading = true;
+    private ElementReference _nextArea;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            loading = false;
+            _loading = false;
             this.StateHasChanged();
-            await nextArea.FocusAsync();
+            await _nextArea.FocusAsync();
         }
     }
 
-    public async void OnSearchClick()
+    private async void OnSearchClick()
     {
         await RunSearch();
     }
 
-    public async void OnNextKeydown(KeyboardEventArgs e)
+    private async void OnNextKeydown(KeyboardEventArgs e)
     {
-        if (e.Code == "Enter" && e.CtrlKey)
+        if (e is { Code: "Enter", CtrlKey: true })
         {
             await RunSearch();
         }
     }
 
-    public async Task RunSearch()
+    private async Task RunSearch()
     {
         try
         {
-            loading = true;
+            _loading = true;
             this.StateHasChanged();
 
-            chat.Messages.Add(new Azure.AI.OpenAI.ChatMessage(ChatRole.User, next));
+            _chat.Messages.Add(new ChatMessage(ChatRole.User, _next));
 
-            next = string.Empty;
+            _next = string.Empty;
 
-            var res = await openAIClient.GetChatCompletionsStreamingAsync(configuration["OpenAI:DeploymentId"], chat);
+            var res = await OpenAiClient.GetChatCompletionsStreamingAsync(Configuration["OpenAI:DeploymentId"], _chat);
 
             await foreach (var choice in res.Value.GetChoicesStreaming())
             {
                 await foreach (var msg in choice.GetMessageStreaming())
                 {
-                    // We collect response as it comes in and display it immediately
-                    stream += msg.Content;
+    // We collect response as it comes in and display it immediately
+                    _stream += msg.Content;
                     this.StateHasChanged();
                 }
             }
 
-            chat.Messages.Add(new ChatMessage(ChatRole.Assistant, stream));
+            _chat.Messages.Add(new ChatMessage(ChatRole.Assistant, _stream));
 
-            loading = false;
-            stream = string.Empty;
-            warningMessage = string.Empty;
+            _loading = false;
+            _stream = string.Empty;
+            _warningMessage = string.Empty;
         }
         catch (Exception ex)
         {
-            warningMessage = ex.Message;
+            _warningMessage = ex.Message;
         }
         finally
         {
-            loading = false;
+            _loading = false;
             this.StateHasChanged();
         }
     }
+
 }
