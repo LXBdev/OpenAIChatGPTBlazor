@@ -19,11 +19,11 @@
     {
         <h5>
             @chatMessage.Role
+            <button class="btn btn-sm" @onclick="() => CopyMessageToNext(chatMessage)" title="Copy as input">
+              <i class="fas fa-level-down-alt"></i>
+            </button>
             <button class="btn btn-sm" @onclick="() => DeleteMessage(chatMessage)" title="Delete this message">
                 <i class="fas fa-trash"></i>
-            </button>
-            <button class="btn btn-sm" @onclick="() => CopyMessageToNext(chatMessage)" title="Copy as input">
-              <i class="fas fa-paste"></i>
             </button>
         </h5>
         @((MarkupString)Markdown.ToHtml(chatMessage.Content))
