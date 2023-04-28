@@ -17,7 +17,12 @@
 <div class="row">
     @foreach (var chatMessage in _chat.Messages)
     {
-        <h5>@chatMessage.Role</h5>
+        <h5>
+            @chatMessage.Role
+            <button class="btn btn-sm" @onclick="() => DeleteMessage(chatMessage)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </h5>
         @((MarkupString)Markdown.ToHtml(chatMessage.Content))
     }
 
@@ -127,6 +132,11 @@
             _loading = false;
             this.StateHasChanged();
         }
+    }
+
+    private void DeleteMessage(ChatMessage chatMessage)
+    {
+        _chat.Messages.Remove(chatMessage);
     }
 
 }
