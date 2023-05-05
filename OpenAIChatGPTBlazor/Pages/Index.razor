@@ -4,6 +4,7 @@
 @using System.Globalization
 @inject IConfiguration Configuration
 @inject OpenAIClient OpenAiClient
+@inject IJSRuntime JS
 
 <PageTitle>My ChatGPT</PageTitle>
 
@@ -42,7 +43,7 @@
     }
     <hr/>
     <div class="col-sm-8">
-        <textarea type="text" class="form-control"
+        <textarea type="text" class="form-control" id="nextArea"
                   placeholder="CTRL+Enter to submit search"
                   @bind="_next" @bind:event="oninput"
                   @ref=_nextArea
@@ -117,6 +118,7 @@
     // We collect response as it comes in and display it immediately
                     _stream += msg.Content;
                     this.StateHasChanged();
+                    await JS.InvokeVoidAsync("scrollElementIntoView", _nextArea);
                 }
             }
 
