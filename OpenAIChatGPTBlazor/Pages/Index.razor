@@ -85,12 +85,12 @@
         }
     }
 
-    private async void OnSearchClick()
+    private async Task OnSearchClick()
     {
         await RunSearch();
     }
 
-    private async void OnNextKeydown(KeyboardEventArgs e)
+    private async Task OnNextKeydown(KeyboardEventArgs e)
     {
         if (e is { Key: "Enter" or "NumpadEnter", CtrlKey: true })
         {
