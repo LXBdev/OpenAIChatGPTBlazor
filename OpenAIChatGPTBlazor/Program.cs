@@ -1,5 +1,6 @@
 using Azure;
 using Azure.AI.OpenAI;
+using Azure.Identity;
 using OpenAIChatGPTBlazor.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,10 +15,22 @@ builder.Services.AddScoped<OpenAIClient>(sp =>
     var apiKey = configuration["OpenAI:ApiKey"];
     var deploymentId = configuration["OpenAI:DeploymentId"];
     var resourceName = configuration["OpenAI:ResourceName"];
-    var client = new OpenAIClient(
-        new Uri($"https://{resourceName}.openai.azure.com/"),
-        new AzureKeyCredential(apiKey));
-    return client;
+
+    if (!string.IsNullOrEmpty(apiKey))
+    {
+
+        var client = new OpenAIClient(
+            new Uri($"https://{resourceName}.openai.azure.com/"),
+            new AzureKeyCredential(apiKey));
+        return client;
+    }
+    else
+    {
+        var client = new OpenAIClient(
+            new Uri($"https://{resourceName}.openai.azure.com/"),
+            new DefaultAzureCredential());
+        return client;
+    }
 });
 
 var app = builder.Build();
