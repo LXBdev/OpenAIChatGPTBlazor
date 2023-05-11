@@ -9,12 +9,6 @@
 <PageTitle>My ChatGPT</PageTitle>
 
 <h4>Welcome to my Chat using OpenAI</h4>
-@if (_warningMessage.Length > 0)
-{
-    <div class="alert alert-warning">
-        <strong>Warning!</strong> @_warningMessage.
-    </div>
-}
 <div class="row">
     @foreach (var chatMessage in _chat.Messages)
     {
@@ -41,7 +35,15 @@
         <div class="loader"></div>
         <p>... please wait ...</p>
     }
-    <hr/>
+    @if (_warningMessage.Length > 0)
+    {
+        <div class="alert alert-warning">
+            <strong>Warning!</strong> @_warningMessage.
+        </div>
+    }
+</div>
+<hr/>
+<div class="row">
     <div class="col-sm-8">
         <textarea type="text" class="form-control" id="nextArea"
                   placeholder="CTRL+Enter to submit search"
