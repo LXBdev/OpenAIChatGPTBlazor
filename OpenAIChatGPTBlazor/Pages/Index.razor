@@ -8,14 +8,23 @@
 
 <PageTitle>My ChatGPT</PageTitle>
 
-<h4>Welcome to my Chat using OpenAI</h4>
+<h4>
+    Welcome to my Chat using OpenAI
+</h4>
+<div class="row">
+    <div>
+        <button class="btn btn-sm btn-light" @onclick="() => DownloadConversation()" title="Export">
+            <i class="fas fa-file-export"></i> Export
+        </button>
+    </div>
+</div>
 <div class="row">
     @foreach (var chatMessage in _chat.Messages)
     {
         <h5>
             @chatMessage.Role
             <button class="btn btn-sm" @onclick="() => CopyMessageToNext(chatMessage)" title="Copy as input">
-              <i class="fas fa-level-down-alt"></i>
+                <i class="fas fa-level-down-alt"></i>
             </button>
             <button class="btn btn-sm" @onclick="() => DeleteMessage(chatMessage)" title="Delete this message">
                 <i class="fas fa-trash"></i>
@@ -31,7 +40,7 @@
     }
     @if (_loading)
     {
-        <br/>
+        <br />
         <div class="loader"></div>
         <p>... please wait ...</p>
     }
@@ -42,7 +51,7 @@
         </div>
     }
 </div>
-<hr/>
+<hr />
 <div class="row">
     <div class="col-sm-8">
         <textarea type="text" class="form-control" id="nextArea"
@@ -52,7 +61,7 @@
                   @onkeydown="@OnNextKeydown">
         </textarea>
     </div>
-    <br/>
+    <br />
     <div class="col-sm-2">
         <button class="btn btn-danger" @onclick="OnSearchClick" type="submit" disabled=@_loading>
             <i class="fas"></i>Submit
@@ -63,19 +72,26 @@
 @code {
 
     private readonly ChatCompletionsOptions _chat = new ChatCompletionsOptions
-    {
-        Messages =
+        {
+            Messages =
         {
             new ChatMessage(ChatRole.System,
                 $"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.")
         }
-    };
+        };
 
     private string _warningMessage = string.Empty;
     private string _next = string.Empty;
     private string _stream = string.Empty;
     private bool _loading = true;
+    private string _model = string.Empty;
     private ElementReference _nextArea;
+
+    protected override void OnInitialized()
+    {
+        _model = Configuration["OpenAI:DeploymentId"];
+        base.OnInitialized();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -111,13 +127,13 @@
 
             _next = string.Empty;
 
-            var res = await OpenAiClient.GetChatCompletionsStreamingAsync(Configuration["OpenAI:DeploymentId"], _chat);
+            var res = await OpenAiClient.GetChatCompletionsStreamingAsync(_model, _chat);
 
             await foreach (var choice in res.Value.GetChoicesStreaming())
             {
                 await foreach (var msg in choice.GetMessageStreaming())
                 {
-    // We collect response as it comes in and display it immediately
+                    // We collect response as it comes in and display it immediately
                     _stream += msg.Content;
                     this.StateHasChanged();
                     await JS.InvokeVoidAsync("scrollElementIntoView", _nextArea);
@@ -145,11 +161,31 @@
     {
         _chat.Messages.Remove(chatMessage);
     }
-    
+
     private async void CopyMessageToNext(ChatMessage chatMessage)
     {
-        _next = chatMessage.Content;  
+        _next = chatMessage.Content;
         await _nextArea.FocusAsync();
+    }
+
+    private async Task DownloadConversation()
+    {
+        System.Text.StringBuilder sb = new System.Text.StringBuilder();
+
+        sb.AppendLine("# ChatGPT Conversation");
+        foreach (var message in _chat.Messages)
+        {
+            sb.AppendLine($"## {message.Role}");
+            sb.AppendLine(message.Content);
+        }
+
+        using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(sb.ToString()));
+
+        var fileName = "conversation.md";
+
+        using var streamRef = new DotNetStreamReference(stream);
+
+        await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
     }
 
 }
