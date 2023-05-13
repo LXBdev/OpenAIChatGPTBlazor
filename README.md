@@ -75,7 +75,7 @@ To use a Azure App Configuration, add user secrets with the following content:
 ```json
 {
   "AppConfig": {
-    "Endpoint": "https://appcs-alex-weu.azconfig.io"
+    "Endpoint": "https://appcs-myinstance-weu.azconfig.io"
   }
 }
 ```
