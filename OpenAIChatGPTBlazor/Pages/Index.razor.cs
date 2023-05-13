@@ -19,12 +19,16 @@ namespace OpenAIChatGPTBlazor.Pages
         private string _next = string.Empty;
         private string _stream = string.Empty;
         private bool _loading = true;
+        private bool _hasModelSelection = false;
         private string _model = string.Empty;
+        private string[] _SelectableModels = new string[0];
         private ElementReference _nextArea;
-        protected override void OnInitialized()
+
+        protected override async Task OnInitializedAsync()
         {
-            _model = Configuration["OpenAI:DeploymentId"];
-            base.OnInitialized();
+            _hasModelSelection = await FeatureManager.IsEnabledAsync("ModelSelection");
+            _model = OpenAIOptions.CurrentValue.DeploymentId ?? _model;
+            _SelectableModels = OpenAIOptions.CurrentValue.SelectableModels?.Split(",") ?? _SelectableModels;
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
