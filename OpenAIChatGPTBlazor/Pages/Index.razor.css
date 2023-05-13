@@ -7,6 +7,9 @@
     display: flex;
     align-items: center;
 }
+    .top-row h4 {
+        margin-top: 0.5rem
+    }
 
     .top-row ::deep a, .top-row .btn-link {
         white-space: nowrap;
