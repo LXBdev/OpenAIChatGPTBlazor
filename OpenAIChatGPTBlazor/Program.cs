@@ -24,6 +24,11 @@ builder.WebHost.ConfigureAppConfiguration(options =>
                 of.Select("*");
                 of.Select("*", opt.Label);
             });
+
+            o.ConfigureRefresh(configure =>
+            {
+                configure.SetCacheExpiration(TimeSpan.FromMinutes(5));
+            });
         });
     }
 });
