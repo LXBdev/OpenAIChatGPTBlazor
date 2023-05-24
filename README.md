@@ -60,7 +60,7 @@ To use a local configuration, add user secrets with the following content:
 {
   "OpenAI": {
     "ResourceName": "oai-myendpoint-eus",
-    "DeploymentId": "gpt-35-turbo",
+    "SelectableModels": "gpt-35-turbo", // Comma-separated list
     "ApiKey": "xxx" // remove to use AAD auth
   },
 }

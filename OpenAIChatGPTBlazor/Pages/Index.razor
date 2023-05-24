@@ -2,17 +2,32 @@
 @using Azure.AI.OpenAI
 @using Markdig
 @using System.Globalization
+@using Microsoft.Extensions.Options;
+@using Microsoft.FeatureManagement;
 @inject IConfiguration Configuration
 @inject OpenAIClient OpenAiClient
 @inject IJSRuntime JS
+@inject IFeatureManager FeatureManager
+@inject IOptionsMonitor<OpenAIOptions> OpenAIOptions
 
 <PageTitle>My ChatGPT</PageTitle>
 
 <div class="top-row px-4 d-flex justify-content-between">
-<h4>
-    Welcome to my Chat using OpenAI
-</h4>
+    <h4>
+        Welcome to my Chat using OpenAI
+    </h4>
     <div>
+        @if (_hasModelSelection)
+        {
+            <EditForm style="display:inline" Model="@this">
+                <InputSelect  @bind-Value="_selectedModel">
+                    @foreach (var item in _selectableModels)
+                    {
+                        <option value="@item">@item</option>
+                    }
+                </InputSelect>
+            </EditForm>
+        }
         <button class="btn btn-sm btn-light" @onclick="() => DownloadConversation()" title="Export">
             <i class="fas fa-file-export"></i> Export
         </button>
@@ -20,55 +35,55 @@
 </div>
 
 <article class="content px-4">
-<div class="row">
-    @foreach (var chatMessage in _chat.Messages)
-    {
-        <h5>
-            @chatMessage.Role
-            <button class="btn btn-sm" @onclick="() => CopyMessageToNext(chatMessage)" title="Copy as input">
-                <i class="fas fa-level-down-alt"></i>
-            </button>
-            <button class="btn btn-sm" @onclick="() => DeleteMessage(chatMessage)" title="Delete this message">
-                <i class="fas fa-trash"></i>
-            </button>
-        </h5>
-        @((MarkupString)Markdown.ToHtml(chatMessage.Content))
-    }
+    <div class="row">
+        @foreach (var chatMessage in _chat.Messages)
+        {
+            <h5>
+                @chatMessage.Role
+                <button class="btn btn-sm" @onclick="() => CopyMessageToNext(chatMessage)" title="Copy as input">
+                    <i class="fas fa-level-down-alt"></i>
+                </button>
+                <button class="btn btn-sm" @onclick="() => DeleteMessage(chatMessage)" title="Delete this message">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </h5>
+            @((MarkupString)Markdown.ToHtml(chatMessage.Content))
+        }
 
-    @if (!string.IsNullOrEmpty(_stream))
-    {
-        <h5>assistant</h5>
-        @((MarkupString)Markdown.ToHtml(_stream))
-    }
-    @if (_loading)
-    {
-        <br />
-        <div class="loader"></div>
-        <p>... please wait ...</p>
-    }
-    @if (_warningMessage.Length > 0)
-    {
-        <div class="alert alert-warning">
-            <strong>Warning!</strong> @_warningMessage.
-        </div>
-    }
-</div>
-<hr />
-<div class="row">
-    <div class="col-sm-8">
-        <textarea type="text" class="form-control" id="nextArea"
-                  placeholder="CTRL+Enter to submit search"
-                  @bind="_next" @bind:event="oninput"
-                  @ref=_nextArea
-                  @onkeydown="@OnNextKeydown">
+        @if (!string.IsNullOrEmpty(_stream))
+        {
+            <h5>assistant</h5>
+            @((MarkupString)Markdown.ToHtml(_stream))
+        }
+        @if (_loading)
+        {
+            <br />
+            <div class="loader"></div>
+            <p>... please wait ...</p>
+        }
+        @if (_warningMessage.Length > 0)
+        {
+            <div class="alert alert-warning">
+                <strong>Warning!</strong> @_warningMessage.
+            </div>
+        }
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-sm-8">
+            <textarea type="text" class="form-control" id="nextArea"
+                      placeholder="CTRL+Enter to submit search"
+                      @bind="_next" @bind:event="oninput"
+                      @ref=_nextArea
+                      @onkeydown="@OnNextKeydown">
         </textarea>
+        </div>
+        <br />
+        <div class="col-sm-2">
+            <button class="btn btn-danger" @onclick="OnSearchClick" type="submit" disabled=@_loading>
+                <i class="fas"></i>Submit
+            </button>
+        </div>
     </div>
-    <br />
-    <div class="col-sm-2">
-        <button class="btn btn-danger" @onclick="OnSearchClick" type="submit" disabled=@_loading>
-            <i class="fas"></i>Submit
-        </button>
-    </div>
-</div>
 </article>
 
