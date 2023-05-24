@@ -20,8 +20,8 @@
         @if (_hasModelSelection)
         {
             <EditForm style="display:inline" Model="@this">
-                <InputSelect  @bind-Value="_model">
-                    @foreach (var item in _SelectableModels)
+                <InputSelect  @bind-Value="_selectedModel">
+                    @foreach (var item in _selectableModels)
                     {
                         <option value="@item">@item</option>
                     }

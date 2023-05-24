@@ -20,15 +20,15 @@ namespace OpenAIChatGPTBlazor.Pages
         private string _stream = string.Empty;
         private bool _loading = true;
         private bool _hasModelSelection = false;
-        private string _model = string.Empty;
-        private string[] _SelectableModels = new string[0];
+        private string _selectedModel = string.Empty;
+        private string[] _selectableModels = new string[0];
         private ElementReference _nextArea;
 
         protected override async Task OnInitializedAsync()
         {
             _hasModelSelection = await FeatureManager.IsEnabledAsync("ModelSelection");
-            _model = OpenAIOptions.CurrentValue.DeploymentId ?? _model;
-            _SelectableModels = OpenAIOptions.CurrentValue.SelectableModels?.Split(",") ?? _SelectableModels;
+            _selectableModels = OpenAIOptions.CurrentValue.SelectableModels?.Split(",") ?? _selectableModels;
+            _selectedModel = _selectableModels.FirstOrDefault(_selectedModel);
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -62,7 +62,7 @@ namespace OpenAIChatGPTBlazor.Pages
                 this.StateHasChanged();
                 _chat.Messages.Add(new ChatMessage(ChatRole.User, _next));
                 _next = string.Empty;
-                var res = await OpenAiClient.GetChatCompletionsStreamingAsync(_model, _chat);
+                var res = await OpenAiClient.GetChatCompletionsStreamingAsync(_selectedModel, _chat);
                 await foreach (var choice in res.Value.GetChoicesStreaming())
                 {
                     await foreach (var msg in choice.GetMessageStreaming())
