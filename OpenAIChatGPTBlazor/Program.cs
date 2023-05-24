@@ -24,11 +24,6 @@ builder.WebHost.ConfigureAppConfiguration(options =>
                 of.Select("*");
                 of.Select("*", opt.Label);
             });
-
-            o.ConfigureRefresh(configure =>
-            {
-                configure.SetCacheExpiration(TimeSpan.FromMinutes(5));
-            });
         });
     }
 });
@@ -44,7 +39,6 @@ builder.Services.AddScoped<OpenAIClient>(sp =>
 {
     var configuration = sp.GetRequiredService<IOptionsSnapshot<OpenAIOptions>>().Value;
     var apiKey = configuration.ApiKey;
-    var deploymentId = configuration.DeploymentId;
     var resourceName = configuration.ResourceName;
 
     if (!string.IsNullOrEmpty(apiKey))
@@ -93,7 +87,6 @@ public class AppConfigOptions
 public class OpenAIOptions
 {
     public string? ApiKey { get; set; }
-    public string? DeploymentId { get; set; }
     public string? ResourceName { get; set; }
     public string? SelectableModels { get; set; }
 }
