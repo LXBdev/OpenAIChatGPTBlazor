@@ -34,7 +34,7 @@
             </button>
         </div>
     </div>
-    <div class="row main flex-column p-4">
+    <div @ref=_mainArea class="row main align-content-start p-4">
         @foreach (var chatMessage in _chat.Messages)
         {
             <h5>
@@ -68,10 +68,10 @@
         }
     </div>
     <hr />
-    <div class="row footer py-3">
+    <div class="row footer">
         <div class="col-sm-8">
             <textarea type="text" class="form-control" id="nextArea" placeholder="CTRL+Enter to submit search"
-            @bind="_next" @bind:event="oninput" @ref=_nextArea @onkeydown="@OnNextKeydown">
+            @bind="_next" @bind:event="oninput" @onkeydown="@OnNextKeydown">
         </textarea>
         </div>
         <br />

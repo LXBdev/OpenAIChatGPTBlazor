@@ -23,7 +23,7 @@ namespace OpenAIChatGPTBlazor.Pages
         private bool _hasModelSelection = false;
         private string _selectedModel = string.Empty;
         private string[] _selectableModels = new string[0];
-        private ElementReference _nextArea;
+        private ElementReference _mainArea;
 
         protected override async Task OnInitializedAsync()
         {
@@ -38,7 +38,7 @@ namespace OpenAIChatGPTBlazor.Pages
             {
                 _loading = false;
                 this.StateHasChanged();
-                await _nextArea.FocusAsync();
+                await _mainArea.FocusAsync();
             }
         }
 
@@ -76,7 +76,7 @@ namespace OpenAIChatGPTBlazor.Pages
                     {
                         _stream += msg.Content;
                         this.StateHasChanged();
-                        await JS.InvokeVoidAsync("scrollElementIntoView", _nextArea);
+                        await JS.InvokeVoidAsync("scrollElementToEnd", _mainArea);
                     }
                 }
 
@@ -126,7 +126,7 @@ namespace OpenAIChatGPTBlazor.Pages
         private async void CopyMessageToNext(ChatMessage chatMessage)
         {
             _next = chatMessage.Content;
-            await _nextArea.FocusAsync();
+            await _mainArea.FocusAsync();
         }
 
         private async Task DownloadConversation()

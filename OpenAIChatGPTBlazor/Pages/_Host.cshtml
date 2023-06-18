@@ -30,8 +30,8 @@
         <a class="dismiss">🗙</a>
     </div>
     <script>
-        window.scrollElementIntoView = (element) => {
-            element.scrollIntoView();
+        window.scrollElementToEnd = (element) => {
+            element.scrollTop = element.scrollHeight;
         };
 
         window.downloadFileFromStream = async (fileName, contentStreamReference) => {
