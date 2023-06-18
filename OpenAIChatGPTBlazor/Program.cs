@@ -3,7 +3,6 @@ using Azure.AI.OpenAI;
 using Azure.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
-using OpenAIChatGPTBlazor.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.ConfigureAppConfiguration(options =>
@@ -30,7 +29,6 @@ builder.WebHost.ConfigureAppConfiguration(options =>
 
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
 
 builder.Services.AddFeatureManagement();
 builder.Services.Configure<OpenAIOptions>(builder.Configuration.GetSection("OpenAI"));

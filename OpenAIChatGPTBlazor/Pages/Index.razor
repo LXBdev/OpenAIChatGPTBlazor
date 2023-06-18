@@ -12,30 +12,29 @@
 
 <PageTitle>My ChatGPT</PageTitle>
 
-<div class="top-row px-4 d-flex justify-content-between">
-    <h4>
-        Welcome to my Chat using OpenAI
-    </h4>
-    <div>
-        @if (_hasModelSelection)
-        {
-            <EditForm style="display:inline" Model="@this">
-                <InputSelect  @bind-Value="_selectedModel">
-                    @foreach (var item in _selectableModels)
-                    {
-                        <option value="@item">@item</option>
-                    }
-                </InputSelect>
-            </EditForm>
-        }
-        <button class="btn btn-sm btn-light" @onclick="() => DownloadConversation()" title="Export">
-            <i class="fas fa-file-export"></i> Export
-        </button>
+<article>
+    <div class="top-row p-4 header justify-content-between">
+        <h4>
+            Welcome to my Chat using OpenAI
+        </h4>
+        <div>
+            @if (_hasModelSelection)
+            {
+                <EditForm style="isplay:inline" Model="@this">
+                    <InputSelect  @bind-Value="_selectedModel">
+                        @foreach (var item in _selectableModels)
+                        {
+                            <option value="@item">@item</option>
+                        }
+                    </InputSelect>
+                </EditForm>
+            }
+            <button class="btn btn-sm btn-light" @onclick="() => DownloadConversation()" title="Export">
+                <i class="fas fa-file-export"></i> Export
+            </button>
+        </div>
     </div>
-</div>
-
-<article class="content px-4">
-    <div class="row">
+    <div class="row main flex-column p-4">
         @foreach (var chatMessage in _chat.Messages)
         {
             <h5>
@@ -69,19 +68,19 @@
         }
     </div>
     <hr />
-    <div class="row">
+    <div class="row footer py-3">
         <div class="col-sm-8">
-            <textarea type="text" class="form-control" id="nextArea"
-                      placeholder="CTRL+Enter to submit search"
-                      @bind="_next" @bind:event="oninput"
-                      @ref=_nextArea
-                      @onkeydown="@OnNextKeydown">
+            <textarea type="text" class="form-control" id="nextArea" placeholder="CTRL+Enter to submit search"
+            @bind="_next" @bind:event="oninput" @ref=_nextArea @onkeydown="@OnNextKeydown">
         </textarea>
         </div>
         <br />
         <div class="col-sm-2">
-            <button class="btn btn-danger" @onclick="OnSearchClick" type="submit" disabled=@_loading>
+            <button class="btn btn-success" @onclick="OnSearchClick" type="submit" disabled=@_loading>
                 <i class="fas"></i>Submit
+            </button>
+            <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled=@(!_loading)>
+                <i class="fas"></i>Abort
             </button>
         </div>
     </div>
