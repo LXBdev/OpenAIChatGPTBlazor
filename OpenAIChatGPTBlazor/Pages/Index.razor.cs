@@ -85,9 +85,9 @@ namespace OpenAIChatGPTBlazor.Pages
                 _stream = string.Empty;
                 _warningMessage = string.Empty;
             }
-            catch (TaskCanceledException)
+            catch (TaskCanceledException) when (_searchCancellationTokenSource?.IsCancellationRequested == true)
             {
-                // Currently (2023-06-18) ignoring due to the OpenAiClient implementation not seeming to properly handle the cancellation.
+                // Gracefully handle cancellation
             }
             catch (Exception ex)
             {
@@ -96,7 +96,6 @@ namespace OpenAIChatGPTBlazor.Pages
             finally
             {
                 _loading = false;
-                this.StateHasChanged();
             }
         }
 
@@ -111,10 +110,6 @@ namespace OpenAIChatGPTBlazor.Pages
             catch (Exception ex)
             {
                 _warningMessage = ex.Message;
-            }
-            finally
-            {
-                this.StateHasChanged();
             }
         }
 
