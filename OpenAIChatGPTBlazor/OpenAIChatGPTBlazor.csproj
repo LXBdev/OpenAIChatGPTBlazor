@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>a9111ff4-d5fb-46b5-9450-c68be5805382</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,6 +14,7 @@
 	<PackageReference Include="Markdig" Version="0.31.0" />
 	<PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="6.0.1" />
 	<PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.5.1" />
+	<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
   </ItemGroup>
 
 </Project>
