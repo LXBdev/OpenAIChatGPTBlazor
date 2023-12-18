@@ -18,17 +18,14 @@
             Welcome to my Chat using OpenAI
         </h4>
         <div>
-            @if (_hasModelSelection)
-            {
-                <EditForm style="isplay:inline" Model="@this">
-                    <InputSelect  @bind-Value="_selectedModel">
-                        @foreach (var item in _selectableModels)
-                        {
-                            <option value="@item">@item</option>
-                        }
-                    </InputSelect>
-                </EditForm>
-            }
+            <EditForm style="isplay:inline" Model="@this">
+                <InputSelect @bind-Value="_selectedModel">
+                    @foreach (var item in _selectableModels)
+                    {
+                        <option value="@item">@item</option>
+                    }
+                </InputSelect>
+            </EditForm>
             <button class="btn btn-sm btn-light" @onclick="() => DownloadConversation()" title="Export">
                 <i class="fas fa-file-export"></i> Export
             </button>
