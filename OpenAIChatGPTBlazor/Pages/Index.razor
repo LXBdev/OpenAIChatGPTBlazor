@@ -19,6 +19,8 @@
         </h4>
         <div>
             <EditForm style="display:inline" Model="@this">
+                <InputCheckbox id="isAutoscrollEnabled" @bind-Value="_isAutoscrollEnabled" class="form-check-input" />
+                <label for="isAutoscrollEnabled" class="form-check-label">Autoscroll</label>
                 <InputSelect @bind-Value="_selectedModel">
                     @foreach (var item in _selectableModels)
                     {
@@ -31,7 +33,7 @@
             </button>
         </div>
     </div>
-    <div class="row main align-content-start p-4">
+    <div @ref=_mainArea class="row main align-content-start p-4">
         @foreach (var chatMessage in _chat.Messages)
         {
             <h5>

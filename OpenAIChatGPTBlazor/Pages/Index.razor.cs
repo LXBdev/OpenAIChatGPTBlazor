@@ -15,14 +15,16 @@ namespace OpenAIChatGPTBlazor.Pages
                 new ChatMessage(ChatRole.System, $"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.")
             }
         };
-        private CancellationTokenSource ?_searchCancellationTokenSource;
+        private CancellationTokenSource? _searchCancellationTokenSource;
         private string _warningMessage = string.Empty;
         private string _next = string.Empty;
         private string _stream = string.Empty;
         private bool _loading = true;
         private string _selectedModel = string.Empty;
         private string[] _selectableModels = new string[0];
+        private bool _isAutoscrollEnabled = true;
         private ElementReference _nextArea;
+        private ElementReference _mainArea;
 
         protected override void OnInitialized()
         {
@@ -74,7 +76,10 @@ namespace OpenAIChatGPTBlazor.Pages
                     {
                         _stream += msg.Content;
                         this.StateHasChanged();
-                        await JS.InvokeVoidAsync("scrollElementToEnd", _nextArea);
+                        if (_isAutoscrollEnabled)
+                        {
+                            await JS.InvokeVoidAsync("scrollElementToEnd", _mainArea); 
+                        }
                     }
                 }
 
@@ -97,7 +102,8 @@ namespace OpenAIChatGPTBlazor.Pages
             }
         }
 
-        private void AbortSearch(){
+        private void AbortSearch()
+        {
             try
             {
                 if (_searchCancellationTokenSource?.Token != null && _searchCancellationTokenSource.Token.CanBeCanceled)
