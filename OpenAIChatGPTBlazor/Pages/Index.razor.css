@@ -59,3 +59,8 @@
         padding-right: 1.5rem !important;
     }
 }
+
+#nextArea {
+    margin-left: 6px;
+    margin-bottom: 6px;
+}
