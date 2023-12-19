@@ -65,6 +65,15 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
+      - name: Start Blazor server
+        run: dotnet run --project ./OpenAIChatGPTBlazor/OpenAIChatGPTBlazor.csproj &
+      
+      - name: Install Playwright
+        run: dotnet tool install --global Microsoft.Playwright.CLI && playwright install
+      
+      - name: Test
+        run: dotnet test ./Tests/UiTests/UiTests.csproj --no-build --verbosity normal
+
   deploy:
     permissions:
       contents: none
