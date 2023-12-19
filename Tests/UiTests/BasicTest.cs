@@ -16,7 +16,7 @@ public class BasicTest : PageTest
     }
 
     [Test]
-    public async Task NextAreaShouldHaveFocusAfterLoading()
+    public async Task SystemMessageShouldBePreset()
     {
         await Expect(Page.GetByText("You are the assistant of a software engineer" )).ToBeVisibleAsync();
     }
