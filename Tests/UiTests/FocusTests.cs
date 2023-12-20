@@ -11,8 +11,7 @@ public class FocusTests : PageTest
     [SetUp]
     public async Task SetUp()
     {
-        // Navigate to your application hosted locally or remotely
-        await Page.GotoAsync("http://localhost:5255"); // Replace with your actual application URL
+        await Page.GotoAsync(BasicTest.BaseUrl);
     }
 
     [Test]

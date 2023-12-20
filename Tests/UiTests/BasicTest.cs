@@ -8,11 +8,12 @@ namespace UiTests;
 [TestFixture]
 public class BasicTest : PageTest
 {
+    public static string BaseUrl = Environment.GetEnvironmentVariable("AppUrl") ?? "http://blazorserver:80";
+
     [SetUp]
     public async Task SetUp()
     {
-        // Navigate to your application hosted locally or remotely
-        await Page.GotoAsync("http://localhost:5255"); // Replace with your actual application URL
+        await Page.GotoAsync(BaseUrl);
     }
 
     [Test]
