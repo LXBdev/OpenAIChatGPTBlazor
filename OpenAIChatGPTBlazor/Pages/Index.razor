@@ -75,7 +75,7 @@
         </div>
         <br />
         <div class="col-sm-2">
-            <button class="btn btn-success" @onclick="OnSearchClick" type="submit" disabled=@_loading>
+            <button id="searchBtn" class="btn btn-success" @onclick="OnSearchClick" type="submit" disabled=@_loading>
                 <i class="fas"></i>Submit
             </button>
             <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled=@(!_loading)>

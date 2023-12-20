@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  blazorserver:
+    build: 
+      #context: ./OpenAIChatGPTBlazor
+      dockerfile: OpenAIChatGPTBlazor/Dockerfile
+    ports:
+      - "5255:80"
+    env_file: playwright.env
+ 
+
+  playwrighttest:
+    build: 
+      dockerfile: Tests/UiTests/Dockerfile
+    # volumes:
+    #   - ./:/tests/
+    # working_dir: /tests/UiTests
+    depends_on:
+      - blazorserver
+    # command:
+    #   - /bin/bash
+    #   - -c 
+    #   - |
+    #     dotnet version
+    #     pwsh -c @"
+    #       Write-Host "Installing global tools"
+    #       dotnet tool install --global Microsoft.Playwright.CLI
+    #       /root/.dotnet/tools/playwright install
+
+    #       Write-Host "Running the tests"
+    #       dotnet test --no-build --verbosity normal
+    #     "@
