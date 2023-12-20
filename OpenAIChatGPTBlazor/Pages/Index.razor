@@ -21,7 +21,7 @@
             <EditForm style="display:inline" Model="@this">
                 <InputCheckbox id="isAutoscrollEnabled" @bind-Value="_isAutoscrollEnabled" class="form-check-input" />
                 <label for="isAutoscrollEnabled" class="form-check-label">Autoscroll</label>
-                <InputSelect @bind-Value="_selectedModel">
+                <InputSelect @bind-Value="_chat.DeploymentName">
                     @foreach (var item in _selectableModels)
                     {
                         <option value="@item">@item</option>
@@ -45,7 +45,7 @@
                     <i class="fas fa-trash"></i>
                 </button>
             </h5>
-            @((MarkupString)Markdown.ToHtml(chatMessage.Content))
+            @((MarkupString)Markdown.ToHtml(GetChatMessageContent(chatMessage)))
         }
 
         @if (!string.IsNullOrEmpty(_stream))
@@ -78,7 +78,7 @@
             <button id="searchBtn" class="btn btn-success" @onclick="OnSearchClick" type="submit" disabled=@_loading>
                 <i class="fas"></i>Submit
             </button>
-            <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled=@(!_loading)>
+            <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled="@(!_loading)">
                 <i class="fas"></i>Abort
             </button>
         </div>

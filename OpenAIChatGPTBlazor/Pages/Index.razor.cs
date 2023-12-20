@@ -12,7 +12,7 @@ namespace OpenAIChatGPTBlazor.Pages
         {
             Messages =
             {
-                new ChatMessage(ChatRole.System, $"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.")
+                new ChatRequestSystemMessage($"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.")
             }
         };
         private CancellationTokenSource? _searchCancellationTokenSource;
@@ -20,7 +20,6 @@ namespace OpenAIChatGPTBlazor.Pages
         private string _next = string.Empty;
         private string _stream = string.Empty;
         private bool _loading = true;
-        private string _selectedModel = string.Empty;
         private string[] _selectableModels = new string[0];
         private bool _isAutoscrollEnabled = true;
         private ElementReference _nextArea;
@@ -29,7 +28,7 @@ namespace OpenAIChatGPTBlazor.Pages
         protected override void OnInitialized()
         {
             _selectableModels = OpenAIOptions.CurrentValue.SelectableModels?.Split(",") ?? _selectableModels;
-            _selectedModel = _selectableModels.FirstOrDefault(_selectedModel);
+            _chat.DeploymentName = _selectableModels.FirstOrDefault();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -66,24 +65,22 @@ namespace OpenAIChatGPTBlazor.Pages
             {
                 _loading = true;
                 this.StateHasChanged();
-                _chat.Messages.Add(new ChatMessage(ChatRole.User, _next));
+                _chat.Messages.Add(new ChatRequestUserMessage(_next));
                 _next = string.Empty;
+
                 _searchCancellationTokenSource = new CancellationTokenSource();
-                var res = await OpenAiClient.GetChatCompletionsStreamingAsync(_selectedModel, _chat, _searchCancellationTokenSource.Token);
-                await foreach (var choice in res.Value.GetChoicesStreaming(_searchCancellationTokenSource.Token))
+                var res = await OpenAiClient.GetChatCompletionsStreamingAsync(_chat, _searchCancellationTokenSource.Token);
+                await foreach (var choice in res.WithCancellation(_searchCancellationTokenSource.Token))
                 {
-                    await foreach (var msg in choice.GetMessageStreaming(_searchCancellationTokenSource.Token))
+                    _stream += choice.ContentUpdate;
+                    this.StateHasChanged();
+                    if (_isAutoscrollEnabled)
                     {
-                        _stream += msg.Content;
-                        this.StateHasChanged();
-                        if (_isAutoscrollEnabled)
-                        {
-                            await JS.InvokeVoidAsync("scrollElementToEnd", _mainArea); 
-                        }
+                        await JS.InvokeVoidAsync("scrollElementToEnd", _mainArea);
                     }
                 }
 
-                _chat.Messages.Add(new ChatMessage(ChatRole.Assistant, _stream.ToString()));
+                _chat.Messages.Add(new ChatRequestAssistantMessage(_stream));
                 _loading = false;
                 _stream = string.Empty;
                 _warningMessage = string.Empty;
@@ -117,14 +114,14 @@ namespace OpenAIChatGPTBlazor.Pages
             }
         }
 
-        private void DeleteMessage(ChatMessage chatMessage)
+        private void DeleteMessage(ChatRequestMessage chatMessage)
         {
             _chat.Messages.Remove(chatMessage);
         }
 
-        private async void CopyMessageToNext(ChatMessage chatMessage)
+        private async void CopyMessageToNext(ChatRequestMessage chatMessage)
         {
-            _next = chatMessage.Content;
+            _next = GetChatMessageContent(chatMessage);
             await _nextArea.FocusAsync();
         }
 
@@ -135,13 +132,24 @@ namespace OpenAIChatGPTBlazor.Pages
             foreach (var message in _chat.Messages)
             {
                 sb.AppendLine($"## {message.Role}");
-                sb.AppendLine(message.Content);
+                sb.AppendLine(GetChatMessageContent(message));
             }
 
             using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(sb.ToString()));
             var fileName = "conversation.md";
             using var streamRef = new DotNetStreamReference(stream);
             await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+        }
+
+        private static string GetChatMessageContent(ChatRequestMessage message)
+        {
+            return message switch
+            {
+                ChatRequestUserMessage userMessage => userMessage.Content,
+                ChatRequestSystemMessage systemMessage => systemMessage.Content,
+                ChatRequestAssistantMessage assistantMessage => assistantMessage.Content,
+                _ => string.Empty
+            };
         }
     }
 }
