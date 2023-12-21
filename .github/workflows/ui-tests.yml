@@ -1,0 +1,53 @@
+
+name: Run UI Tests
+
+env:
+  DOTNET_VERSION: '6.0.*'                 # set this to the .NET Core version to use
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Set up dependency caching for faster builds
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+            
+      - name: Start Blazor server
+        run: dotnet run --project ./OpenAIChatGPTBlazor/OpenAIChatGPTBlazor.csproj &
+        env:
+          OpenAi__ResourceName : xxxxxxxxxample
+          OpenAi__SelectableModels : gpt12
+          OpenAi__ApiKey : nokey
+      
+      - name: Install Playwright
+        run: dotnet tool install --global Microsoft.Playwright.CLI && playwright install
+      
+      - name: Test
+        run: dotnet test ./Tests/UiTests/UiTests.csproj
+
+      # - name: Upload artifact for deployment job
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: .net-app
+      #     path: ${{env.DOTNET_ROOT}}/myapp
