@@ -68,7 +68,7 @@ jobs:
           path: ${{env.DOTNET_ROOT}}/myapp
 
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'deploy')
     permissions:
       contents: none
     runs-on: ubuntu-latest
