@@ -1,0 +1,59 @@
+﻿@page "/GenerateImage"
+@using Azure.AI.OpenAI
+@using System.Globalization
+@using Microsoft.Extensions.Options;
+@using Microsoft.FeatureManagement;
+@using OpenAIChatGPTBlazor.Components
+@inject IConfiguration Configuration
+@inject OpenAIClient OpenAiClient
+@inject IJSRuntime JS
+@inject IFeatureManager FeatureManager
+@inject IOptionsMonitor<OpenAIOptions> OpenAIOptions
+
+<PageTitle>My DALL-E</PageTitle>
+
+<article>
+    <div class="top-row p-4 header justify-content-between">
+        <h4>
+            Welcome to my Image Generation using OpenAI
+        </h4>
+    </div>
+    <div class="row main align-content-start p-4 img-container">
+
+        @if (_loading)
+        {
+            <br />
+            <div class="loader"></div>
+            <p>... please wait ...</p>
+        }
+        @if (_warningMessage.Length > 0)
+        {
+            <div class="alert alert-warning">
+                <strong>Warning!</strong> @_warningMessage.
+            </div>
+        }
+
+        <p>@_revisedPrompt</p>
+
+        @if (_imageUrl is not null)
+        {
+            <img src="@_imageUrl" class="img-fluid" />
+        }
+    </div>
+    <hr />
+    <div class="row footer">
+        <div class="col-sm-8">
+            <GenerateImageOptions @ref="_optionsComponent" DeploymentName="@_next" />
+        </div>
+        <br />
+        <div class="col-sm-2">
+            <button id="submitBtn" class="btn btn-success" @onclick="OnSubmitClick" type="submit" disabled=@_loading>
+                <i class="fas"></i>Submit
+            </button>
+            <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled="@(!_loading)">
+                <i class="fas"></i>Abort
+            </button>
+        </div>
+    </div>
+</article>
+

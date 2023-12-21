@@ -8,7 +8,7 @@ namespace UiTests;
 [TestFixture]
 public class BasicTest : PageTest
 {
-    public static string BaseUrl = Environment.GetEnvironmentVariable("AppUrl") ?? "http://blazorserver:80";
+    public static string BaseUrl = Environment.GetEnvironmentVariable("AppUrl") ?? "https://localhost:7128/";
 
     [SetUp]
     public async Task SetUp()

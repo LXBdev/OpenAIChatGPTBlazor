@@ -18,6 +18,8 @@ services:
     # working_dir: /tests/UiTests
     depends_on:
       - blazorserver
+    environment:
+      - AppUrl=http://blazorserver:80
     # command:
     #   - /bin/bash
     #   - -c 
