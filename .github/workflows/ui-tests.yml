@@ -34,7 +34,7 @@ jobs:
             ${{ runner.os }}-nuget-
             
       - name: Start Blazor server
-        run: dotnet run --project ./OpenAIChatGPTBlazor/OpenAIChatGPTBlazor.csproj &
+        run: dotnet run --project ./OpenAIChatGPTBlazor/OpenAIChatGPTBlazor.csproj
         env:
           OpenAi__ResourceName : xxxxxxxxxample
           OpenAi__SelectableModels : gpt12
