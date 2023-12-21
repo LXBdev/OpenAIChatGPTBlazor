@@ -41,7 +41,7 @@ jobs:
           OpenAi__ApiKey : nokey
       
       - name: Install Playwright
-        run: dotnet tool install --global Microsoft.Playwright.CLI && playwright install
+        run: dotnet tool install --global Microsoft.Playwright.CLI && playwright install --include-deps
       
       - name: Test
         run: dotnet test ./Tests/UiTests/UiTests.csproj
