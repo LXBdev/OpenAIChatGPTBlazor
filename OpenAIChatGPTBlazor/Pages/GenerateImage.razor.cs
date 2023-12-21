@@ -1,8 +1,5 @@
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.JSInterop;
-using Azure.AI.OpenAI;
-using System.Globalization;
+using OpenAIChatGPTBlazor.Components;
 
 namespace OpenAIChatGPTBlazor.Pages
 {
@@ -12,24 +9,17 @@ namespace OpenAIChatGPTBlazor.Pages
         private string _warningMessage = string.Empty;
         private string _next = string.Empty;
         private bool _loading = true;
-        private string[] _selectableModels = new string[0];
-        private ElementReference _nextArea;
+        private GenerateImageOptions _optionsComponent = new();
 
         private Uri? _imageUrl = null;
         private string _revisedPrompt = string.Empty;
 
-        protected override void OnInitialized()
-        {
-            _selectableModels = OpenAIOptions.CurrentValue.SelectableModels?.Split(",") ?? _selectableModels;
-        }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
+        protected override void OnAfterRender(bool firstRender)
         {
             if (firstRender)
             {
                 _loading = false;
                 this.StateHasChanged();
-                await _nextArea.FocusAsync();
             }
         }
 
@@ -43,14 +33,6 @@ namespace OpenAIChatGPTBlazor.Pages
             AbortSearch();
         }
 
-        private async Task OnNextKeydown(KeyboardEventArgs e)
-        {
-            if (e is { Key: "Enter" or "NumpadEnter", CtrlKey: true })
-            {
-                await RunSubmit();
-            }
-        }
-
         private async Task RunSubmit()
         {
             try
@@ -59,7 +41,7 @@ namespace OpenAIChatGPTBlazor.Pages
                 this.StateHasChanged();
 
                 _searchCancellationTokenSource = new CancellationTokenSource();
-                var res = await OpenAiClient.GetImageGenerationsAsync(new(_next) { DeploymentName = "Dalle3"}, _searchCancellationTokenSource.Token);
+                var res = await OpenAiClient.GetImageGenerationsAsync(_optionsComponent.AsAzureOptions("Dalle3"), _searchCancellationTokenSource.Token);
 
                 foreach (var imageData in res.Value.Data)
                 {
