@@ -92,7 +92,7 @@ jobs:
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
   deploy-ait:
-    if: github.event_name != 'pull_request' or contains(github.event.pull_request.labels.*.name, 'deploy')
+    if: github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'deploy')
     permissions:
       contents: none
     runs-on: ubuntu-latest
