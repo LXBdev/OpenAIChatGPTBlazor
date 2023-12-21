@@ -39,6 +39,9 @@ jobs:
           OpenAi__ResourceName : xxxxxxxxxample
           OpenAi__SelectableModels : gpt12
           OpenAi__ApiKey : nokey
+
+      - name: Build Tests
+        run: dotnet build ./Tests/UiTests/UiTests.csproj
       
       - name: Install Playwright
         run: dotnet tool install --global Microsoft.Playwright.CLI && playwright install --include-deps
