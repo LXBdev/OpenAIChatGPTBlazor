@@ -44,7 +44,7 @@ jobs:
         run: dotnet build ./Tests/UiTests/UiTests.csproj
       
       - name: Install Playwright
-        run: dotnet tool install --global Microsoft.Playwright.CLI && playwright install --include-deps
+        run: dotnet tool install --global Microsoft.Playwright.CLI && playwright install --with-deps
       
       - name: Test
         run: dotnet test ./Tests/UiTests/UiTests.csproj
