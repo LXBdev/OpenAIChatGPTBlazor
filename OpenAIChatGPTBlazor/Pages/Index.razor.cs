@@ -39,6 +39,11 @@ namespace OpenAIChatGPTBlazor.Pages
                 this.StateHasChanged();
                 await _nextArea.FocusAsync();
             }
+            if (!_loading)
+            {
+                // Highlight after load finished to avoid excessive highlighting
+                await JS.InvokeVoidAsync("window.Prism.highlightAll");
+            }
         }
 
         private async Task OnSearchClick()
