@@ -17,7 +17,6 @@ builder.WebHost.ConfigureAppConfiguration(options =>
 
             o.Select("*");
             o.Select("*", opt.Label);
-
             o.UseFeatureFlags(of =>
             {
                 of.Select("*");
@@ -28,7 +27,12 @@ builder.WebHost.ConfigureAppConfiguration(options =>
 });
 
 builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor();
+builder.Services.AddServerSideBlazor()
+    .AddHubOptions(o =>
+    {
+        // Increase max message size so user can sent large input as part of conversation
+        o.MaximumReceiveMessageSize = 10240000;
+    });
 
 builder.Services.AddFeatureManagement();
 builder.Services.Configure<OpenAIOptions>(builder.Configuration.GetSection("OpenAI"));
