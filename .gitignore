@@ -355,3 +355,6 @@ MigrationBackup/
 .ionide/
 
 .idea
+
+# Libman client-side libs
+OpenAIChatGPTBlazor/wwwroot/lib/
