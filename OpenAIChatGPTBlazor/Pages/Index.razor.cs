@@ -8,6 +8,9 @@ namespace OpenAIChatGPTBlazor.Pages
 {
     public partial class Index : IAsyncDisposable
     {
+        private const string SELECTED_MODEL = "SelectedModel";
+        private const string IS_AUTOSCROLL_ENABLED = "IsAutoscrollEnabled";
+
         private readonly ChatCompletionsOptions _chat = new ChatCompletionsOptions
         {
             Messages =
@@ -40,14 +43,20 @@ namespace OpenAIChatGPTBlazor.Pages
             {
                 _module = await JS.InvokeAsync<IJSObjectReference>("import",
                     "./Pages/Index.razor.js");
+                _chat.DeploymentName = await LocalStorage.GetItemAsync<string>(SELECTED_MODEL) ?? _chat.DeploymentName;
+                _isAutoscrollEnabled = await LocalStorage.GetItemAsync<bool?>(IS_AUTOSCROLL_ENABLED) ?? _isAutoscrollEnabled;
+
                 _loading = false;
                 this.StateHasChanged();
                 await _nextArea.FocusAsync();
             }
             if (!_loading)
             {
-                // Highlight after load finished to avoid excessive highlighting
+                // Highlight after load finished to avoid excessive flickering
                 await JS.InvokeVoidAsync("window.Prism.highlightAll");
+
+                await LocalStorage.SetItemAsync<string>(SELECTED_MODEL, _chat.DeploymentName);
+                await LocalStorage.SetItemAsync<bool>(IS_AUTOSCROLL_ENABLED, _isAutoscrollEnabled);
             }
         }
 
@@ -176,7 +185,14 @@ namespace OpenAIChatGPTBlazor.Pages
         {
             if (_module is not null)
             {
-                await _module.DisposeAsync();
+                try
+                {
+                    await _module.DisposeAsync();
+                }
+                catch (JSDisconnectedException)
+                {
+                    // Thrown if user reloads the page, can be ignored. JS can't be called after SignalR has been disconnected
+                }
             }
         }
     }
