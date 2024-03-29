@@ -35,7 +35,8 @@
     }
 
 .top-row-toggle {
-    display: none
+    display: none;
+    background-color: #f7f7f7;
 }
 
 @media (max-width: 640.98px) {
