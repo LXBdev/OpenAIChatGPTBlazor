@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "library": "prism@1.29.0",
+      "destination": "wwwroot/lib/prism/",
+      "files": [
+        "themes/prism.min.css",
+        "plugins/toolbar/prism-toolbar.min.css",
+        "prism.min.js",
+        "components/prism-asciidoc.min.js",
+        "components/prism-bash.min.js",
+        "components/prism-batch.min.js",
+        "components/prism-csharp.min.js",
+        "components/prism-cshtml.min.js",
+        "components/prism-css.min.js",
+        "components/prism-docker.min.js",
+        "components/prism-http.min.js",
+        "components/prism-javascript.min.js",
+        "components/prism-json.min.js",
+        "components/prism-markdown.min.js",
+        "components/prism-markup.min.js",
+        "components/prism-powershell.min.js",
+        "components/prism-sql.min.js",
+        "components/prism-typescript.min.js",
+        "components/prism-yaml.min.js",
+        "plugins/toolbar/prism-toolbar.min.js",
+        "plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"
+      ]
+    }
+  ]
+}
