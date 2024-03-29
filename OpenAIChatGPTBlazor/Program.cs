@@ -1,6 +1,7 @@
 using Azure;
 using Azure.AI.OpenAI;
 using Azure.Identity;
+using Blazored.LocalStorage;
 using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
 
@@ -34,6 +35,8 @@ builder.Services.AddServerSideBlazor()
         o.MaximumReceiveMessageSize = 10240000;
     });
 
+
+builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddFeatureManagement();
 builder.Services.Configure<OpenAIOptions>(builder.Configuration.GetSection("OpenAI"));
 
