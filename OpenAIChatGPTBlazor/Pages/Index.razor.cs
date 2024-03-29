@@ -6,7 +6,7 @@ using System.Globalization;
 
 namespace OpenAIChatGPTBlazor.Pages
 {
-    public partial class Index
+    public partial class Index : IAsyncDisposable
     {
         private readonly ChatCompletionsOptions _chat = new ChatCompletionsOptions
         {
@@ -24,6 +24,7 @@ namespace OpenAIChatGPTBlazor.Pages
         private bool _isAutoscrollEnabled = true;
         private ElementReference _nextArea;
         private ElementReference _mainArea;
+        private IJSObjectReference? module;
 
         protected override void OnInitialized()
         {
@@ -35,6 +36,8 @@ namespace OpenAIChatGPTBlazor.Pages
         {
             if (firstRender)
             {
+                module = await JS.InvokeAsync<IJSObjectReference>("import",
+                    "./Pages/Index.razor.js");
                 _loading = false;
                 this.StateHasChanged();
                 await _nextArea.FocusAsync();
@@ -79,9 +82,9 @@ namespace OpenAIChatGPTBlazor.Pages
                 {
                     _stream += choice.ContentUpdate;
                     this.StateHasChanged();
-                    if (_isAutoscrollEnabled)
+                    if (_isAutoscrollEnabled && module is not null)
                     {
-                        await JS.InvokeVoidAsync("scrollElementToEnd", _mainArea);
+                        await module.InvokeVoidAsync("scrollElementToEnd", _mainArea);
                     }
                 }
 
@@ -143,7 +146,11 @@ namespace OpenAIChatGPTBlazor.Pages
             using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(sb.ToString()));
             var fileName = "conversation.md";
             using var streamRef = new DotNetStreamReference(stream);
-            await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+
+            if (module is not null)
+            {
+                await module.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            }
         }
 
         private static string GetChatMessageContent(ChatRequestMessage message)
@@ -155,6 +162,13 @@ namespace OpenAIChatGPTBlazor.Pages
                 ChatRequestAssistantMessage assistantMessage => assistantMessage.Content,
                 _ => string.Empty
             };
+        }
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (module is not null)
+            {
+                await module.DisposeAsync();
+            }
         }
     }
 }
