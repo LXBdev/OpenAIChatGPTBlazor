@@ -169,7 +169,7 @@ namespace OpenAIChatGPTBlazor.Pages
         private void ToggleTopRow(MouseEventArgs e)
         {
             _isTopRowToggled = !_isTopRowToggled;
-            _additionalTopRowClass = _isTopRowToggled ? "show-always" : "";
+            _additionalTopRowClass = _isTopRowToggled ? "show-top-row" : "";
         }
 
         async ValueTask IAsyncDisposable.DisposeAsync()

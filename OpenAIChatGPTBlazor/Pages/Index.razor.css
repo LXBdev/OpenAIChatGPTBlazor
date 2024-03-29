@@ -34,16 +34,12 @@
         text-overflow: ellipsis;
     }
 
-.show-always {
-    display: flex !important
-}
-
 .top-row-toggle {
     display: none
 }
 
 @media (max-width: 640.98px) {
-    .top-row:not(.auth) {
+    .top-row:not(.auth):not(.show-top-row) {
         display: none;
     }
 
