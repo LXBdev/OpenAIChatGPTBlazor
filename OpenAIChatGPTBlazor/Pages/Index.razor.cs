@@ -24,7 +24,9 @@ namespace OpenAIChatGPTBlazor.Pages
         private bool _isAutoscrollEnabled = true;
         private ElementReference _nextArea;
         private ElementReference _mainArea;
-        private IJSObjectReference? module;
+        private IJSObjectReference? _module;
+        private bool _isTopRowToggled;
+        private string _additionalTopRowClass = string.Empty;
 
         protected override void OnInitialized()
         {
@@ -36,7 +38,7 @@ namespace OpenAIChatGPTBlazor.Pages
         {
             if (firstRender)
             {
-                module = await JS.InvokeAsync<IJSObjectReference>("import",
+                _module = await JS.InvokeAsync<IJSObjectReference>("import",
                     "./Pages/Index.razor.js");
                 _loading = false;
                 this.StateHasChanged();
@@ -82,9 +84,9 @@ namespace OpenAIChatGPTBlazor.Pages
                 {
                     _stream += choice.ContentUpdate;
                     this.StateHasChanged();
-                    if (_isAutoscrollEnabled && module is not null)
+                    if (_isAutoscrollEnabled && _module is not null)
                     {
-                        await module.InvokeVoidAsync("scrollElementToEnd", _mainArea);
+                        await _module.InvokeVoidAsync("scrollElementToEnd", _mainArea);
                     }
                 }
 
@@ -147,9 +149,9 @@ namespace OpenAIChatGPTBlazor.Pages
             var fileName = "conversation.md";
             using var streamRef = new DotNetStreamReference(stream);
 
-            if (module is not null)
+            if (_module is not null)
             {
-                await module.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+                await _module.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
             }
         }
 
@@ -163,11 +165,18 @@ namespace OpenAIChatGPTBlazor.Pages
                 _ => string.Empty
             };
         }
+
+        private void ToggleTopRow(MouseEventArgs e)
+        {
+            _isTopRowToggled = !_isTopRowToggled;
+            _additionalTopRowClass = _isTopRowToggled ? "show-always" : "";
+        }
+
         async ValueTask IAsyncDisposable.DisposeAsync()
         {
-            if (module is not null)
+            if (_module is not null)
             {
-                await module.DisposeAsync();
+                await _module.DisposeAsync();
             }
         }
     }
