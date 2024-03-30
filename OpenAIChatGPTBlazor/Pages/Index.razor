@@ -26,9 +26,9 @@
         </h4>
         <div>
             <EditForm style="display:inline" Model="@this">
-                <InputCheckbox id="isAutoscrollEnabled" @bind-Value="_isAutoscrollEnabled" class="form-check-input" />
+                <InputCheckbox id="isAutoscrollEnabled" @bind-Value="_isAutoscrollEnabled" @bind-Value:after="OnSettingsChanged" class="form-check-input" />
                 <label for="isAutoscrollEnabled" class="form-check-label">Autoscroll</label>
-                <InputSelect @bind-Value="_chat.DeploymentName">
+                <InputSelect @bind-Value="_chat.DeploymentName" @bind-Value:after="OnSettingsChanged">
                     @foreach (var item in _selectableModels)
                     {
                         <option value="@item">@item</option>
