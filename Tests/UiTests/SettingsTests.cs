@@ -1,9 +1,11 @@
-﻿using Microsoft.Playwright;
-using Microsoft.Playwright.NUnit;
+﻿using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
 
 namespace UiTests;
 
+/// <remarks>
+/// Tests are slightly flaky because Settings are stored and loaded in additional render step because of JS interop
+/// </remarks>
 [Parallelizable(ParallelScope.Self)]
 [TestFixture]
 public class SettingsTests : PageTest
@@ -17,21 +19,35 @@ public class SettingsTests : PageTest
     [Test]
     public async Task LocalStorageShouldHaveUpdatedValueAfterChanges()
     {
-        // Wait for submit button to be enabled
-        await Page.WaitForSelectorAsync("#searchBtn:not([disabled])", new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible });
+        // Given
+        var checkedBefore = await Page.IsCheckedAsync("#isAutoscrollEnabled");
+        Assert.IsTrue(checkedBefore, "Autoscroll should be enabled by default");
 
-        var storedString = await Page.EvaluateAsync<string>("() => localStorage.getItem('IsAutoscrollEnabled')");
-
-        Assert.IsTrue(Boolean.TryParse(storedString, out var storedBefore), $"{storedString} expected to be a valid bool");
-
+        // When
         await Page.ClickAsync("#isAutoscrollEnabled");
+        await Page.WaitForFunctionAsync($"() => localStorage.getItem('IsAutoscrollEnabled') !== '{checkedBefore}'");
 
-        await Page.WaitForFunctionAsync($"() => localStorage.getItem('IsAutoscrollEnabled') !== '{storedString}'");
-
-        storedString = await Page.EvaluateAsync<string>("() => localStorage.getItem('IsAutoscrollEnabled')");
-
+        // Then
+        var storedString = await Page.EvaluateAsync<string>("() => localStorage.getItem('IsAutoscrollEnabled')");
         Assert.IsTrue(Boolean.TryParse(storedString, out var storedAfter), $"{storedString} expected to be a valid bool");
+        Assert.AreNotEqual(checkedBefore, storedAfter, "expected changed value");
+    }
 
-        Assert.AreNotEqual(storedBefore, storedAfter, "expected changed value");
+    [Test]
+    public async Task ChangedSettingShouldUseStoredValueOnPageLoad()
+    {
+        // Given
+        var isChecked = await Page.IsCheckedAsync("#isAutoscrollEnabled");
+        Assert.IsTrue(isChecked, "Autoscroll should be enabled by default");
+
+        // When setting is changed and page reloaded
+        await Page.ClickAsync("#isAutoscrollEnabled");
+        await Page.WaitForFunctionAsync($"() => localStorage.getItem('IsAutoscrollEnabled') !== 'true'");
+        await Page.ReloadAsync();
+        
+        // Then
+        await Page.WaitForSelectorAsync("#isAutoscrollEnabled:not([checked])");
+        isChecked = await Page.IsCheckedAsync("#isAutoscrollEnabled");
+        Assert.IsFalse(isChecked, "Autoscroll should be disabled after reload because the setting should be persisted");
     }
 }
