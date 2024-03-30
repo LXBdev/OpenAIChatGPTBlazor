@@ -54,9 +54,6 @@ namespace OpenAIChatGPTBlazor.Pages
             {
                 // Highlight after load finished to avoid excessive flickering
                 await JS.InvokeVoidAsync("window.Prism.highlightAll");
-
-                await LocalStorage.SetItemAsync<string>(SELECTED_MODEL, _chat.DeploymentName);
-                await LocalStorage.SetItemAsync<bool>(IS_AUTOSCROLL_ENABLED, _isAutoscrollEnabled);
             }
         }
 
@@ -179,6 +176,12 @@ namespace OpenAIChatGPTBlazor.Pages
         {
             _isTopRowToggled = !_isTopRowToggled;
             _additionalTopRowClass = _isTopRowToggled ? "show-top-row" : "";
+        }
+
+        private async Task OnSettingsChanged()
+        {
+            await LocalStorage.SetItemAsync<bool>(IS_AUTOSCROLL_ENABLED, _isAutoscrollEnabled);
+            await LocalStorage.SetItemAsync<string>(SELECTED_MODEL, _chat.DeploymentName);
         }
 
         async ValueTask IAsyncDisposable.DisposeAsync()
