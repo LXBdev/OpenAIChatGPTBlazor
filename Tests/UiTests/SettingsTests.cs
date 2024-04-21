@@ -1,4 +1,5 @@
-﻿using Microsoft.Playwright.NUnit;
+﻿using Microsoft.Playwright;
+using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
 
 namespace UiTests;
@@ -44,9 +45,10 @@ public class SettingsTests : PageTest
         await Page.ClickAsync("#isAutoscrollEnabled");
         await Page.WaitForFunctionAsync($"() => localStorage.getItem('IsAutoscrollEnabled') !== 'true'");
         await Page.ReloadAsync();
-        
+
+        await Page.WaitForSelectorAsync("#searchBtn:not([disabled])", new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible });
+
         // Then
-        await Page.WaitForSelectorAsync("#isAutoscrollEnabled:not([checked])");
         isChecked = await Page.IsCheckedAsync("#isAutoscrollEnabled");
         Assert.IsFalse(isChecked, "Autoscroll should be disabled after reload because the setting should be persisted");
     }
