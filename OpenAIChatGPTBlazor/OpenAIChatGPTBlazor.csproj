@@ -12,7 +12,7 @@
 		<PackageReference Include="Azure.AI.OpenAI" Version="1.0.0-beta.15" />
 		<PackageReference Include="Azure.Identity" Version="1.11.2" />
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
-		<PackageReference Include="Markdig" Version="0.36.2" />
+		<PackageReference Include="Markdig" Version="0.37.0" />
 		<PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="7.1.0" />
 		<PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.2.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
