@@ -15,6 +15,7 @@ public class SettingsTests : PageTest
     public async Task SetUp()
     {
         await Page.GotoAsync(BasicTest.BaseUrl);
+        await Page.WaitForSelectorAsync("#searchBtn:not([disabled])", new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible });
     }
 
     [Test]
