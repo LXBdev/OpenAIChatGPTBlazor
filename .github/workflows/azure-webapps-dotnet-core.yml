@@ -22,6 +22,7 @@ name: Build and deploy ASP.Net Core app to an Azure Web App
 env:
   AZURE_WEBAPP_NAME: wa-gpt-weu    # set this to the name of your Azure Web App
   AZURE_WEBAPP_NAME_AIT: wa-gpt-ait-weu    # set this to the name of your Azure Web App
+  AZURE_WEBAPP_NAME_SIE: wa-gpt-SIE-weu    # set this to the name of your Azure Web App
   AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
 
 on:
@@ -113,4 +114,28 @@ jobs:
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME_AIT }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_WA_GPT_AIT_WEU }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+  deploy-sie:
+    if: github.event_name != 'pull_request'
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: 'wa-gpt-sie-weu'
+      url: ${{ steps.deploy-to-sie-webapp.outputs.webapp-url }}
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+
+      - name: Deploy to Azure Web App
+        id: deploy-to-sie-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME_SIE }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE_WA_GPT_SIE_WEU }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
