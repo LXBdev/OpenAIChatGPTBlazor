@@ -5,10 +5,8 @@
 @using Microsoft.Extensions.Options;
 @using Microsoft.FeatureManagement;
 @inject IConfiguration Configuration
-@inject OpenAIClient OpenAiClient
 @inject IJSRuntime JS
 @inject IFeatureManager FeatureManager
-@inject IOptionsMonitor<OpenAIOptions> OpenAIOptions
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 
 <PageTitle>My ChatGPT</PageTitle>
@@ -28,10 +26,10 @@
             <EditForm style="display:inline" Model="@this">
                 <InputCheckbox id="isAutoscrollEnabled" @bind-Value="_isAutoscrollEnabled" @bind-Value:after="OnSettingsChanged" class="form-check-input" />
                 <label for="isAutoscrollEnabled" class="form-check-label">Autoscroll</label>
-                <InputSelect @bind-Value="_chat.DeploymentName" @bind-Value:after="OnSettingsChanged">
-                    @foreach (var item in _selectableModels)
+                <InputSelect @bind-Value="_SelectedOptionKey" @bind-Value:after="OnSettingsChanged">
+                    @foreach (var item in OpenAIOptions.CurrentValue)
                     {
-                        <option value="@item">@item</option>
+                        <option value="@item.Key">@item</option>
                     }
                 </InputSelect>
             </EditForm>
