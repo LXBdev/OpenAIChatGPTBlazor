@@ -44,6 +44,11 @@ builder.Services.AddScoped<IDictionary<string, OpenAIClient>>(sp =>
 
     foreach (var configuration in configurations)
     {
+        // Skip if resourcename or deploymentname is not set
+        if (string.IsNullOrEmpty(configuration.ResourceName) || string.IsNullOrEmpty(configuration.DeploymentName))
+        {
+            continue;
+        }
         var apiKey = configuration.ApiKey;
         var resourceName = configuration.ResourceName;
 
