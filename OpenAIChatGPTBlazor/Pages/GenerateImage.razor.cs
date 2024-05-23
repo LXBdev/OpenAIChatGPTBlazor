@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using OpenAIChatGPTBlazor.Components;
+using Azure.AI.OpenAI;
 
 namespace OpenAIChatGPTBlazor.Pages
 {
@@ -13,6 +15,9 @@ namespace OpenAIChatGPTBlazor.Pages
 
         private Uri? _imageUrl = null;
         private string _revisedPrompt = string.Empty;
+
+        [Inject]
+        public IDictionary<string, OpenAIClient> OpenAIClients { get; set; } = new Dictionary<string, OpenAIClient>();
 
         protected override void OnAfterRender(bool firstRender)
         {
@@ -41,7 +46,8 @@ namespace OpenAIChatGPTBlazor.Pages
                 this.StateHasChanged();
 
                 _searchCancellationTokenSource = new CancellationTokenSource();
-                var res = await OpenAiClient.GetImageGenerationsAsync(_optionsComponent.AsAzureOptions("Dalle3"), _searchCancellationTokenSource.Token);
+                // TODO HACK
+                var res = await OpenAIClients.First().Value.GetImageGenerationsAsync(_optionsComponent.AsAzureOptions("Dalle3"), _searchCancellationTokenSource.Token);
 
                 foreach (var imageData in res.Value.Data)
                 {

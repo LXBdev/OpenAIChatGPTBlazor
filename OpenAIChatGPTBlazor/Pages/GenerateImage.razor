@@ -1,11 +1,9 @@
 ﻿@page "/GenerateImage"
-@using Azure.AI.OpenAI
 @using System.Globalization
 @using Microsoft.Extensions.Options;
 @using Microsoft.FeatureManagement;
 @using OpenAIChatGPTBlazor.Components
 @inject IConfiguration Configuration
-@inject OpenAIClient OpenAiClient
 @inject IJSRuntime JS
 @inject IFeatureManager FeatureManager
 @inject IOptionsMonitor<OpenAIOptions> OpenAIOptions
@@ -56,4 +54,3 @@
         </div>
     </div>
 </article>
-
