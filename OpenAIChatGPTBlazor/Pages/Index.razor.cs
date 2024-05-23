@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using Azure.AI.OpenAI;
 using System.Globalization;
+using Microsoft.Extensions.Options;
 
 namespace OpenAIChatGPTBlazor.Pages
 {
@@ -23,18 +24,23 @@ namespace OpenAIChatGPTBlazor.Pages
         private string _next = string.Empty;
         private string _stream = string.Empty;
         private bool _loading = true;
-        private string[] _selectableModels = new string[0];
         private bool _isAutoscrollEnabled = true;
         private ElementReference _nextArea;
         private ElementReference _mainArea;
         private IJSObjectReference? _module;
         private bool _isTopRowToggled;
         private string _additionalTopRowClass = string.Empty;
+        private string _SelectedOptionKey = string.Empty;
+                
+        [Inject]
+        public IDictionary<string, OpenAIClient> OpenAIClients { get; set; } = new Dictionary<string, OpenAIClient>();
+        [Inject]
+        public IOptionsMonitor<List<OpenAIOptions>> OpenAIOptions { get; set; } = null!;
 
         protected override void OnInitialized()
         {
-            _selectableModels = OpenAIOptions.CurrentValue.SelectableModels?.Split(",") ?? _selectableModels;
-            _chat.DeploymentName = _selectableModels.FirstOrDefault();
+            var options = OpenAIOptions.CurrentValue.FirstOrDefault();
+            _SelectedOptionKey = options != null ? options.Key : _SelectedOptionKey;
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -43,7 +49,7 @@ namespace OpenAIChatGPTBlazor.Pages
             {
                 _module = await JS.InvokeAsync<IJSObjectReference>("import",
                     "./Pages/Index.razor.js");
-                _chat.DeploymentName = await LocalStorage.GetItemAsync<string>(SELECTED_MODEL) ?? _chat.DeploymentName;
+                _SelectedOptionKey = await LocalStorage.GetItemAsync<string>(SELECTED_MODEL) ?? _SelectedOptionKey;
                 _isAutoscrollEnabled = await LocalStorage.GetItemAsync<bool?>(IS_AUTOSCROLL_ENABLED) ?? _isAutoscrollEnabled;
 
                 _loading = false;
@@ -85,7 +91,14 @@ namespace OpenAIChatGPTBlazor.Pages
                 _next = string.Empty;
 
                 _searchCancellationTokenSource = new CancellationTokenSource();
-                var res = await OpenAiClient.GetChatCompletionsStreamingAsync(_chat, _searchCancellationTokenSource.Token);
+                var selectedOption = OpenAIOptions.CurrentValue.FirstOrDefault(x => x.Key == _SelectedOptionKey);
+                if (selectedOption is null)
+                {
+                    throw new InvalidOperationException("Selected model is not found.");
+                }
+                var client = OpenAIClients[selectedOption.Key];
+                _chat.DeploymentName = selectedOption.DeploymentName;
+                var res = await client.GetChatCompletionsStreamingAsync(_chat, _searchCancellationTokenSource.Token);
                 await foreach (var choice in res.WithCancellation(_searchCancellationTokenSource.Token))
                 {
                     _stream += choice.ContentUpdate;
@@ -181,7 +194,7 @@ namespace OpenAIChatGPTBlazor.Pages
         private async Task OnSettingsChanged()
         {
             await LocalStorage.SetItemAsync<bool>(IS_AUTOSCROLL_ENABLED, _isAutoscrollEnabled);
-            await LocalStorage.SetItemAsync<string>(SELECTED_MODEL, _chat.DeploymentName);
+            await LocalStorage.SetItemAsync<string>(SELECTED_MODEL, _SelectedOptionKey);
         }
 
         async ValueTask IAsyncDisposable.DisposeAsync()

@@ -35,29 +35,39 @@ builder.Services.AddServerSideBlazor()
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddFeatureManagement();
-builder.Services.Configure<OpenAIOptions>(builder.Configuration.GetSection("OpenAI"));
+builder.Services.Configure<List<OpenAIOptions>>(builder.Configuration.GetSection("OpenAI"));
 
-builder.Services.AddScoped<OpenAIClient>(sp =>
+builder.Services.AddScoped<IDictionary<string, OpenAIClient>>(sp =>
 {
-    var configuration = sp.GetRequiredService<IOptionsSnapshot<OpenAIOptions>>().Value;
-    var apiKey = configuration.ApiKey;
-    var resourceName = configuration.ResourceName;
+    var configurations = sp.GetRequiredService<IOptionsSnapshot<List<OpenAIOptions>>>().Value;
+    var clients = new Dictionary<string, OpenAIClient>();
 
-    if (!string.IsNullOrEmpty(apiKey))
+    foreach (var configuration in configurations)
     {
+        // Skip if resourcename or deploymentname is not set
+        if (string.IsNullOrEmpty(configuration.ResourceName) || string.IsNullOrEmpty(configuration.DeploymentName))
+        {
+            continue;
+        }
+        var apiKey = configuration.ApiKey;
+        var resourceName = configuration.ResourceName;
 
-        var client = new OpenAIClient(
-            new Uri($"https://{resourceName}.openai.azure.com/"),
-            new AzureKeyCredential(apiKey));
-        return client;
+        if (!string.IsNullOrEmpty(apiKey))
+        {
+            var client = new OpenAIClient(
+                new Uri($"https://{resourceName}.openai.azure.com/"),
+                new AzureKeyCredential(apiKey));
+            clients[configuration.Key] = client;
+        }
+        else
+        {
+            var client = new OpenAIClient(
+                new Uri($"https://{resourceName}.openai.azure.com/"),
+                new DefaultAzureCredential());
+            clients[configuration.Key] = client;
+        }
     }
-    else
-    {
-        var client = new OpenAIClient(
-            new Uri($"https://{resourceName}.openai.azure.com/"),
-            new DefaultAzureCredential());
-        return client;
-    }
+    return clients;
 });
 
 var app = builder.Build();
@@ -88,7 +98,10 @@ public class AppConfigOptions
 
 public class OpenAIOptions
 {
-    public string? ApiKey { get; set; }
+    public string? Hint { get; set; }
     public string? ResourceName { get; set; }
-    public string? SelectableModels { get; set; }
+    public string? DeploymentName { get; set; }
+    public string? ApiKey { get; set; }
+    public string Key => $"{DeploymentName}-{Hint}";
+    public override string ToString() => $"{DeploymentName} ({Hint})";
 }
