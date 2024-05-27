@@ -73,11 +73,24 @@
     </div>
     <hr />
     <div class="row footer">
-        <div class="col-sm-8">
+        <div class="col-sm-7">
             <textarea type="text" class="form-control" id="nextArea" placeholder="CTRL+Enter to submit search"
                       @bind="_next" @bind:event="oninput" @onkeydown="@OnNextKeydown" @ref=_nextArea>
-        </textarea>
+            </textarea>
+            <div style="cursor: pointer;" @onclick="() => {_file=null;}">@_file?.filename</div>
         </div>
+        @if (_SelectedOption?.HasVision == true)
+        {
+            <div class ="col-sm-1">
+                <div id="drop-area" class="border rounded d-flex justify-content-center align-items-center"
+                    style="cursor: pointer;">
+                    <div class="text-center">
+                    <i class="fas fa-image"></i>
+                    </div>
+                </div>
+                <InputFile class="d-none" id="fileElem" OnChange="LoadFiles" accept=".png,.jpg,.jpeg"/>
+            </div>
+        }
         <br />
         <div class="col-sm-2">
             <button id="searchBtn" class="btn btn-success" @onclick="OnSearchClick" type="submit" disabled=@_loading>

@@ -102,6 +102,7 @@ public class OpenAIOptions
     public string? ResourceName { get; set; }
     public string? DeploymentName { get; set; }
     public string? ApiKey { get; set; }
+    public bool HasVision { get; set; }
     public string Key => $"{DeploymentName}-{Hint}";
     public override string ToString() => $"{DeploymentName} ({Hint})";
 }

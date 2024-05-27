@@ -13,3 +13,9 @@ export async function downloadFileFromStream (fileName, contentStreamReference) 
     anchorElement.remove();
     URL.revokeObjectURL(url);
 }
+
+let dropArea = document.getElementById("drop-area");
+
+dropArea.addEventListener("click", () => {
+  fileElem.click();
+});
