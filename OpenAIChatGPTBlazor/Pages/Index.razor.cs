@@ -73,7 +73,7 @@ namespace OpenAIChatGPTBlazor.Pages
             if (file != null)
             {
                 var buffer = new byte[file.Size];
-                await file.OpenReadStream().ReadAsync(buffer);
+                await file.OpenReadStream(10_000_000).ReadAsync(buffer);
                 _file = (file.Name, new BinaryData(buffer), file.ContentType);
             }
         }
