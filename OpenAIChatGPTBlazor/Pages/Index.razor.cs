@@ -14,13 +14,7 @@ namespace OpenAIChatGPTBlazor.Pages
         private const string IS_AUTOSCROLL_ENABLED = "IsAutoscrollEnabled";
         private const string CHAT_HISTORY = "ChatHistoryV1";
 
-        private readonly ChatCompletionsOptions _chat = new ChatCompletionsOptions
-        {
-            Messages =
-            {
-                new ChatRequestSystemMessage($"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.")
-            }
-        };
+        private readonly ChatCompletionsOptions _chat = new ChatCompletionsOptions();
         private CancellationTokenSource? _searchCancellationTokenSource;
         private string _warningMessage = string.Empty;
         private string _next = string.Empty;
