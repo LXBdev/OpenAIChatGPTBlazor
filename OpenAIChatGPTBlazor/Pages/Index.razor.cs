@@ -251,7 +251,7 @@ namespace OpenAIChatGPTBlazor.Pages
             }
             else
             {
-                ResetChat();
+                await ResetChat();
             }
         }
 
