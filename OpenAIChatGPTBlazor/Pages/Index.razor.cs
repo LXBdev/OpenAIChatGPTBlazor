@@ -4,6 +4,7 @@ using Microsoft.JSInterop;
 using Azure.AI.OpenAI;
 using System.Globalization;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace OpenAIChatGPTBlazor.Pages
 {
@@ -11,6 +12,7 @@ namespace OpenAIChatGPTBlazor.Pages
     {
         private const string SELECTED_MODEL = "SelectedModel";
         private const string IS_AUTOSCROLL_ENABLED = "IsAutoscrollEnabled";
+        private const string CHAT_HISTORY = "ChatHistoryV1";
 
         private readonly ChatCompletionsOptions _chat = new ChatCompletionsOptions
         {
@@ -51,6 +53,7 @@ namespace OpenAIChatGPTBlazor.Pages
                     "./Pages/Index.razor.js");
                 _SelectedOptionKey = await LocalStorage.GetItemAsync<string>(SELECTED_MODEL) ?? _SelectedOptionKey;
                 _isAutoscrollEnabled = await LocalStorage.GetItemAsync<bool?>(IS_AUTOSCROLL_ENABLED) ?? _isAutoscrollEnabled;
+                await InitiateChat();
 
                 _loading = false;
                 this.StateHasChanged();
@@ -110,6 +113,8 @@ namespace OpenAIChatGPTBlazor.Pages
                 }
 
                 _chat.Messages.Add(new ChatRequestAssistantMessage(_stream));
+                await StoreChatHistory();
+
                 _loading = false;
                 _stream = string.Empty;
                 _warningMessage = string.Empty;
@@ -211,5 +216,70 @@ namespace OpenAIChatGPTBlazor.Pages
                 }
             }
         }
+
+        private async Task ResetChat()
+        {
+            _chat.Messages.Clear();
+            _chat.Messages.Add(new ChatRequestSystemMessage($"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}."));
+
+            await StoreChatHistory();
+        }
+
+        private async Task StoreChatHistory()
+        {
+            var mapped = new List<MyChatMessage>();
+            foreach (var item in _chat.Messages)
+            {
+                var a = item switch
+                {
+                    ChatRequestSystemMessage message => new MyChatMessage(message.Role.ToString(), message.Content),
+                    ChatRequestUserMessage message => new MyChatMessage(message.Role.ToString(), message.Content),
+                    ChatRequestAssistantMessage message => new MyChatMessage(message.Role.ToString(), message.Content),
+                    _ => new MyChatMessage("", "")
+                };
+                mapped.Add(a);
+            }
+            var json = JsonSerializer.Serialize(mapped);
+            await LocalStorage.SetItemAsStringAsync(CHAT_HISTORY, json);
+        }
+
+        private async Task InitiateChat()
+        {
+            var chatHistory = await LocalStorage.GetItemAsync<string>(CHAT_HISTORY) ?? "[]";
+            var chat = JsonToChat(chatHistory);
+            if (chat.Count > 0)
+            {
+                _chat.Messages.Clear();
+                foreach (var item in chat)
+                {
+                    _chat.Messages.Add(item);
+                }
+            }
+            else
+            {
+                ResetChat();
+            }
+        }
+
+        private IList<ChatRequestMessage> JsonToChat(string json)
+        {
+            List<ChatRequestMessage> result = [];
+            var messages = JsonSerializer.Deserialize<IList<MyChatMessage>>(json) ?? [];
+            foreach (var item in messages)
+            {
+                ChatRequestMessage a = item switch
+                {
+                    { role: "system" } message => new ChatRequestSystemMessage(message.message),
+                    { role: "assistant" } message => new ChatRequestAssistantMessage(message.message),
+                    _ => new ChatRequestUserMessage(item.message)
+                } ;
+
+                result.Add(a);
+            }
+
+            return result;
+        }
     }
+
+    record MyChatMessage(string role, string message);
 }
