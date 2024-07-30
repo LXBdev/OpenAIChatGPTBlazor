@@ -20,9 +20,12 @@
     </div>
     <div class="top-row p-4 header justify-content-between @_additionalTopRowClass">
         <h4>
-            Welcome to my Chat using OpenAI
+            Welcome
         </h4>
         <div>
+            <button class="btn btn-sm btn-light" @onclick="() => ResetChat()" title="New Chat">
+                <i class="fas fa-file-circle-plus"></i> New Chat
+            </button>
             <EditForm style="display:inline" Model="@this">
                 <InputCheckbox id="isAutoscrollEnabled" @bind-Value="_isAutoscrollEnabled" @bind-Value:after="OnSettingsChanged" class="form-check-input" />
                 <label for="isAutoscrollEnabled" class="form-check-label">Autoscroll</label>
