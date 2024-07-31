@@ -27,11 +27,14 @@ namespace OpenAIChatGPTBlazor.Pages
         private bool _isTopRowToggled;
         private string _additionalTopRowClass = string.Empty;
         private string _SelectedOptionKey = string.Empty;
-                
+
         [Inject]
         public IDictionary<string, OpenAIClient> OpenAIClients { get; set; } = new Dictionary<string, OpenAIClient>();
         [Inject]
         public IOptionsMonitor<List<OpenAIOptions>> OpenAIOptions { get; set; } = null!;
+        [Inject]
+        public ILogger<Index> Logger { get; set; } = null!;
+
 
         protected override void OnInitialized()
         {
@@ -239,8 +242,17 @@ namespace OpenAIChatGPTBlazor.Pages
 
         private async Task InitiateChat()
         {
-            var chatHistory = await LocalStorage.GetItemAsync<string>(CHAT_HISTORY) ?? "[]";
-            var chat = JsonToChat(chatHistory);
+            IList<ChatRequestMessage> chat;
+            try
+            {
+                var chatHistory = await LocalStorage.GetItemAsync<string>(CHAT_HISTORY) ?? "[]";
+                chat = JsonToChat(chatHistory);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to load chat history. Resetting chat.");
+                chat = new List<ChatRequestMessage>();
+            }
             if (chat.Count > 0)
             {
                 _chat.Messages.Clear();
@@ -266,7 +278,7 @@ namespace OpenAIChatGPTBlazor.Pages
                     { role: "system" } message => new ChatRequestSystemMessage(message.message),
                     { role: "assistant" } message => new ChatRequestAssistantMessage(message.message),
                     _ => new ChatRequestUserMessage(item.message)
-                } ;
+                };
 
                 result.Add(a);
             }
