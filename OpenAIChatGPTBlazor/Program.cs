@@ -1,8 +1,5 @@
-using Azure;
-using Azure.AI.OpenAI;
 using Azure.Identity;
 using Blazored.LocalStorage;
-using Microsoft.Extensions.Options;
 using Microsoft.FeatureManagement;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,38 +34,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddFeatureManagement();
 builder.Services.Configure<List<OpenAIOptions>>(builder.Configuration.GetSection("OpenAI"));
 
-builder.Services.AddScoped<IDictionary<string, OpenAIClient>>(sp =>
-{
-    var configurations = sp.GetRequiredService<IOptionsSnapshot<List<OpenAIOptions>>>().Value;
-    var clients = new Dictionary<string, OpenAIClient>();
-
-    foreach (var configuration in configurations)
-    {
-        // Skip if resourcename or deploymentname is not set
-        if (string.IsNullOrEmpty(configuration.ResourceName) || string.IsNullOrEmpty(configuration.DeploymentName))
-        {
-            continue;
-        }
-        var apiKey = configuration.ApiKey;
-        var resourceName = configuration.ResourceName;
-
-        if (!string.IsNullOrEmpty(apiKey))
-        {
-            var client = new OpenAIClient(
-                new Uri($"https://{resourceName}.openai.azure.com/"),
-                new AzureKeyCredential(apiKey));
-            clients[configuration.Key] = client;
-        }
-        else
-        {
-            var client = new OpenAIClient(
-                new Uri($"https://{resourceName}.openai.azure.com/"),
-                new DefaultAzureCredential());
-            clients[configuration.Key] = client;
-        }
-    }
-    return clients;
-});
+builder.AddAzureOpenAIClient("openAi");
 
 var app = builder.Build();
 

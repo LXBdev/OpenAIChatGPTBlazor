@@ -41,10 +41,10 @@
         </div>
     </div>
     <div @ref=_mainArea class="row main align-content-start p-4">
-        @foreach (var chatMessage in _chat.Messages)
+        @foreach (var chatMessage in _chatMessages)
         {
             <h5>
-                @chatMessage.Role
+                @* @chatMessage.Role *@  @* TODO *@
                 <button class="btn btn-sm" @onclick="() => CopyMessageToNext(chatMessage)" title="Copy as input">
                     <i class="fas fa-level-down-alt"></i>
                 </button>
