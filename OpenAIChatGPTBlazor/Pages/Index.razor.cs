@@ -15,6 +15,10 @@ namespace OpenAIChatGPTBlazor.Pages
         private const string IS_AUTOSCROLL_ENABLED = "IsAutoscrollEnabled";
         private const string CHAT_HISTORY = "ChatHistoryV1";
 
+        private const string ROLE_SYSTEM = "system";
+        private const string ROLE_USER = "user";
+        private const string ROLE_ASSISTANT = "assistant";
+
         private List<ChatMessage> _chatMessages = new List<ChatMessage>();
         private CancellationTokenSource? _searchCancellationTokenSource;
         private string _warningMessage = string.Empty;
@@ -165,29 +169,38 @@ namespace OpenAIChatGPTBlazor.Pages
 
         private async Task DownloadConversation()
         {
-            // TODO
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine("# ChatGPT Conversation");
+            foreach (var message in _chatMessages)
+            {
+                sb.AppendLine($"## {GetChatMessageRole(message)}");
+                sb.AppendLine(GetChatMessageContent(message));
+            }
 
-            //System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            //sb.AppendLine("# ChatGPT Conversation");
-            //foreach (var message in _chat.Messages)
-            //{
-            //    sb.AppendLine($"## {message.Role}");
-            //    sb.AppendLine(GetChatMessageContent(message));
-            //}
+            using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(sb.ToString()));
+            var fileName = "conversation.md";
+            using var streamRef = new DotNetStreamReference(stream);
 
-            //using var stream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(sb.ToString()));
-            //var fileName = "conversation.md";
-            //using var streamRef = new DotNetStreamReference(stream);
-
-            //if (_module is not null)
-            //{
-            //    await _module.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
-            //}
+            if (_module is not null)
+            {
+                await _module.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            }
         }
 
         private static string GetChatMessageContent(ChatMessage message)
         {
             return message.Content.FirstOrDefault()?.Text ?? "[No Text]";
+        }
+
+        private string GetChatMessageRole(ChatMessage message)
+        {
+            return message switch
+            {
+                SystemChatMessage => ROLE_SYSTEM,
+                UserChatMessage => ROLE_USER,
+                AssistantChatMessage => ROLE_ASSISTANT,
+                _ => "unknown"
+            };
         }
 
         private void ToggleTopRow(MouseEventArgs e)
@@ -232,9 +245,9 @@ namespace OpenAIChatGPTBlazor.Pages
             {
                 var a = item switch
                 {
-                    SystemChatMessage message => new MyChatMessage(message.ParticipantName, GetChatMessageContent(message)),
-                    UserChatMessage message => new MyChatMessage(message.ParticipantName, GetChatMessageContent(message)),
-                    AssistantChatMessage message => new MyChatMessage(message.ParticipantName, GetChatMessageContent(message)),
+                    SystemChatMessage message => new MyChatMessage(ROLE_SYSTEM, GetChatMessageContent(message)),
+                    UserChatMessage message => new MyChatMessage(ROLE_USER, GetChatMessageContent(message)),
+                    AssistantChatMessage message => new MyChatMessage(ROLE_ASSISTANT, GetChatMessageContent(message)),
                     _ => new MyChatMessage("", "")
                 };
                 mapped.Add(a);
@@ -278,8 +291,8 @@ namespace OpenAIChatGPTBlazor.Pages
             {
                 ChatMessage a = item switch
                 {
-                    { role: "system" } message => new SystemChatMessage(message.message),
-                    { role: "assistant" } message => new AssistantChatMessage(message.message),
+                    { role: ROLE_SYSTEM } message => new SystemChatMessage(message.message),
+                    { role: ROLE_ASSISTANT } message => new AssistantChatMessage(message.message),
                     _ => new UserChatMessage(item.message)
                 };
 

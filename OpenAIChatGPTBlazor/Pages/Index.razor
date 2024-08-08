@@ -44,7 +44,7 @@
         @foreach (var chatMessage in _chatMessages)
         {
             <h5>
-                @* @chatMessage.Role *@  @* TODO *@
+                @GetChatMessageRole(chatMessage)
                 <button class="btn btn-sm" @onclick="() => CopyMessageToNext(chatMessage)" title="Copy as input">
                     <i class="fas fa-level-down-alt"></i>
                 </button>
