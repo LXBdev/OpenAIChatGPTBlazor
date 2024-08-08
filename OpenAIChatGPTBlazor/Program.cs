@@ -65,9 +65,7 @@ public class AppConfigOptions
 public class OpenAIOptions
 {
     public string? Hint { get; set; }
-    public string? ResourceName { get; set; }
     public string? DeploymentName { get; set; }
-    public string? ApiKey { get; set; }
     public string Key => $"{DeploymentName}-{Hint}";
     public override string ToString() => $"{DeploymentName} ({Hint})";
 }
