@@ -34,7 +34,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddFeatureManagement();
 builder.Services.Configure<List<OpenAIOptions>>(builder.Configuration.GetSection("OpenAI"));
 
-builder.AddAzureOpenAIClient("openAi");
+builder.AddAzureOpenAIClient("OpenAi");
 
 var app = builder.Build();
 

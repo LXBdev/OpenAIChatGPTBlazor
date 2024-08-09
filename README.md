@@ -65,8 +65,8 @@ To use a local configuration, add user secrets with the following content:
       }
   ],
   "ConnectionStrings": {
-    //"openAi": "Endpoint=https://myoaiservice.openai.azure.com/;" // AAD Authentication
-    //"openAi": "Endpoint=https://myoaiservice.openai.azure.com/;Key=xxx;"
+    //"OpenAi": "Endpoint=https://myoaiservice.openai.azure.com/;" // AAD Authentication
+    //"OpenAi": "Endpoint=https://myoaiservice.openai.azure.com/;Key=xxx;"
   }
 }
 ```
