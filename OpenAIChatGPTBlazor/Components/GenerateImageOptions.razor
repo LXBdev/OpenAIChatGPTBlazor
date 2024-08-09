@@ -1,7 +1,8 @@
 ﻿@using Azure.AI.OpenAI
+@using OpenAI.Images
 <EditForm Model="@this">
     <div class="form-group">
-        <InputTextArea class="form-control" placeholder="Prompt" @bind-Value="_prompt" />
+        <InputTextArea class="form-control" placeholder="Prompt" @bind-Value="Prompt" />
     </div>
     <div class="form-group">
         <label for="size">Size</label>
@@ -12,13 +13,13 @@
         </InputSelect>
         <label for="quality">Quality</label>
         <InputSelect id="quality" name="quality" @bind-Value="_quality">
-            <option value="standard">Standard</option>
-            <option value="hd">HD</option>
+            <option value="Standard">Standard</option>
+            <option value="HD">HD</option>
         </InputSelect>
         <label for="style">Style</label>
         <InputSelect id="style" name="style" @bind-Value="_style">
-            <option value="natural">Natural</option>
-            <option value="vivid">Vivid</option>
+            <option value="Natural">Natural</option>
+            <option value="Vivid">Vivid</option>
         </InputSelect>
     </div>
 </EditForm>
@@ -26,23 +27,19 @@
 
 @code {
     [Parameter]
-    public string? DeploymentName { get; set; }
+    public string Prompt { get; set; } = string.Empty;
 
-    private string _prompt = "";
-    private string _size = ImageSize.Size1024x1024.ToString();
-    private string _quality = ImageGenerationQuality.Standard.ToString();
-    private string _style = ImageGenerationStyle.Natural.ToString();
+    private string _size = GeneratedImageSize.W1024xH1024.ToString();
+    private string _quality = GeneratedImageQuality.Standard.ToString();
+    private string _style = GeneratedImageStyle.Natural.ToString();
 
     public ImageGenerationOptions AsAzureOptions(string deploymentName)
     {
         return new()
             {
-                DeploymentName = deploymentName,
-                Prompt = _prompt,
-                ImageCount = 1,
-                Size = _size,
-                Quality = _quality,
-                Style = _style
+                Size = new GeneratedImageSize(int.Parse(_size.Split("x")[0]), int.Parse(_size.Split("x")[1])),
+                Quality = Enum.Parse<GeneratedImageQuality>(_quality),
+                Style = Enum.Parse<GeneratedImageStyle>(_style)
             };
     }
 }

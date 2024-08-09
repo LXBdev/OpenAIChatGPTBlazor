@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
-using Azure.AI.OpenAI;
 using System.Globalization;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+using OpenAI.Chat;
+using OpenAI;
 
 namespace OpenAIChatGPTBlazor.Pages
 {
@@ -14,7 +15,11 @@ namespace OpenAIChatGPTBlazor.Pages
         private const string IS_AUTOSCROLL_ENABLED = "IsAutoscrollEnabled";
         private const string CHAT_HISTORY = "ChatHistoryV1";
 
-        private readonly ChatCompletionsOptions _chat = new ChatCompletionsOptions();
+        private const string ROLE_SYSTEM = "system";
+        private const string ROLE_USER = "user";
+        private const string ROLE_ASSISTANT = "assistant";
+
+        private List<ChatMessage> _chatMessages = new List<ChatMessage>();
         private CancellationTokenSource? _searchCancellationTokenSource;
         private string _warningMessage = string.Empty;
         private string _next = string.Empty;
@@ -29,7 +34,8 @@ namespace OpenAIChatGPTBlazor.Pages
         private string _SelectedOptionKey = string.Empty;
 
         [Inject]
-        public IDictionary<string, OpenAIClient> OpenAIClients { get; set; } = new Dictionary<string, OpenAIClient>();
+        public OpenAIClient OpenAIClient { get; set; } = null!;
+
         [Inject]
         public IOptionsMonitor<List<OpenAIOptions>> OpenAIOptions { get; set; } = null!;
         [Inject]
@@ -87,7 +93,8 @@ namespace OpenAIChatGPTBlazor.Pages
             {
                 _loading = true;
                 this.StateHasChanged();
-                _chat.Messages.Add(new ChatRequestUserMessage(_next));
+                _chatMessages.Add(new UserChatMessage(_next));
+
                 _next = string.Empty;
 
                 _searchCancellationTokenSource = new CancellationTokenSource();
@@ -96,20 +103,24 @@ namespace OpenAIChatGPTBlazor.Pages
                 {
                     throw new InvalidOperationException("Selected model is not found.");
                 }
-                var client = OpenAIClients[selectedOption.Key];
-                _chat.DeploymentName = selectedOption.DeploymentName;
-                var res = await client.GetChatCompletionsStreamingAsync(_chat, _searchCancellationTokenSource.Token);
-                await foreach (var choice in res.WithCancellation(_searchCancellationTokenSource.Token))
+                var client = OpenAIClient.GetChatClient(selectedOption.DeploymentName);
+
+                var updates = client.CompleteChatStreamingAsync(_chatMessages);
+                await foreach (StreamingChatCompletionUpdate update in updates)
                 {
-                    _stream += choice.ContentUpdate;
-                    this.StateHasChanged();
-                    if (_isAutoscrollEnabled && _module is not null)
+                    foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
                     {
-                        await _module.InvokeVoidAsync("scrollElementToEnd", _mainArea);
+                        _stream += updatePart.Text;
+                        this.StateHasChanged();
+                        if (_isAutoscrollEnabled && _module is not null)
+                        {
+                            await _module.InvokeVoidAsync("scrollElementToEnd", _mainArea);
+                        }
                     }
                 }
 
-                _chat.Messages.Add(new ChatRequestAssistantMessage(_stream));
+                _chatMessages.Add(new AssistantChatMessage(_stream));
+
                 await StoreChatHistory();
 
                 _loading = false;
@@ -145,12 +156,12 @@ namespace OpenAIChatGPTBlazor.Pages
             }
         }
 
-        private void DeleteMessage(ChatRequestMessage chatMessage)
+        private void DeleteMessage(ChatMessage chatMessage)
         {
-            _chat.Messages.Remove(chatMessage);
+            _chatMessages.Remove(chatMessage);
         }
 
-        private async void CopyMessageToNext(ChatRequestMessage chatMessage)
+        private async void CopyMessageToNext(ChatMessage chatMessage)
         {
             _next = GetChatMessageContent(chatMessage);
             await _nextArea.FocusAsync();
@@ -160,9 +171,9 @@ namespace OpenAIChatGPTBlazor.Pages
         {
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             sb.AppendLine("# ChatGPT Conversation");
-            foreach (var message in _chat.Messages)
+            foreach (var message in _chatMessages)
             {
-                sb.AppendLine($"## {message.Role}");
+                sb.AppendLine($"## {GetChatMessageRole(message)}");
                 sb.AppendLine(GetChatMessageContent(message));
             }
 
@@ -176,14 +187,19 @@ namespace OpenAIChatGPTBlazor.Pages
             }
         }
 
-        private static string GetChatMessageContent(ChatRequestMessage message)
+        private static string GetChatMessageContent(ChatMessage message)
+        {
+            return message.Content.FirstOrDefault()?.Text ?? "[No Text]";
+        }
+
+        private string GetChatMessageRole(ChatMessage message)
         {
             return message switch
             {
-                ChatRequestUserMessage userMessage => userMessage.Content,
-                ChatRequestSystemMessage systemMessage => systemMessage.Content,
-                ChatRequestAssistantMessage assistantMessage => assistantMessage.Content,
-                _ => string.Empty
+                SystemChatMessage => ROLE_SYSTEM,
+                UserChatMessage => ROLE_USER,
+                AssistantChatMessage => ROLE_ASSISTANT,
+                _ => "unknown"
             };
         }
 
@@ -216,8 +232,8 @@ namespace OpenAIChatGPTBlazor.Pages
 
         private async Task ResetChat()
         {
-            _chat.Messages.Clear();
-            _chat.Messages.Add(new ChatRequestSystemMessage($"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}."));
+            _chatMessages.Clear();
+            _chatMessages.Add(new SystemChatMessage($"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}."));
 
             await StoreChatHistory();
         }
@@ -225,13 +241,13 @@ namespace OpenAIChatGPTBlazor.Pages
         private async Task StoreChatHistory()
         {
             var mapped = new List<MyChatMessage>();
-            foreach (var item in _chat.Messages)
+            foreach (var item in _chatMessages)
             {
                 var a = item switch
                 {
-                    ChatRequestSystemMessage message => new MyChatMessage(message.Role.ToString(), message.Content),
-                    ChatRequestUserMessage message => new MyChatMessage(message.Role.ToString(), message.Content),
-                    ChatRequestAssistantMessage message => new MyChatMessage(message.Role.ToString(), message.Content),
+                    SystemChatMessage message => new MyChatMessage(ROLE_SYSTEM, GetChatMessageContent(message)),
+                    UserChatMessage message => new MyChatMessage(ROLE_USER, GetChatMessageContent(message)),
+                    AssistantChatMessage message => new MyChatMessage(ROLE_ASSISTANT, GetChatMessageContent(message)),
                     _ => new MyChatMessage("", "")
                 };
                 mapped.Add(a);
@@ -242,7 +258,7 @@ namespace OpenAIChatGPTBlazor.Pages
 
         private async Task InitiateChat()
         {
-            IList<ChatRequestMessage> chat;
+            IList<ChatMessage> chat;
             try
             {
                 var chatHistory = await LocalStorage.GetItemAsync<string>(CHAT_HISTORY) ?? "[]";
@@ -251,14 +267,14 @@ namespace OpenAIChatGPTBlazor.Pages
             catch (Exception ex)
             {
                 Logger.LogWarning(ex, "Failed to load chat history. Resetting chat.");
-                chat = new List<ChatRequestMessage>();
+                chat = new List<ChatMessage>();
             }
             if (chat.Count > 0)
             {
-                _chat.Messages.Clear();
+                _chatMessages.Clear();
                 foreach (var item in chat)
                 {
-                    _chat.Messages.Add(item);
+                    _chatMessages.Add(item);
                 }
             }
             else
@@ -267,17 +283,17 @@ namespace OpenAIChatGPTBlazor.Pages
             }
         }
 
-        private IList<ChatRequestMessage> JsonToChat(string json)
+        private IList<ChatMessage> JsonToChat(string json)
         {
-            List<ChatRequestMessage> result = [];
+            List<ChatMessage> result = [];
             var messages = JsonSerializer.Deserialize<IList<MyChatMessage>>(json) ?? [];
             foreach (var item in messages)
             {
-                ChatRequestMessage a = item switch
+                ChatMessage a = item switch
                 {
-                    { role: "system" } message => new ChatRequestSystemMessage(message.message),
-                    { role: "assistant" } message => new ChatRequestAssistantMessage(message.message),
-                    _ => new ChatRequestUserMessage(item.message)
+                    { role: ROLE_SYSTEM } message => new SystemChatMessage(message.message),
+                    { role: ROLE_ASSISTANT } message => new AssistantChatMessage(message.message),
+                    _ => new UserChatMessage(item.message)
                 };
 
                 result.Add(a);

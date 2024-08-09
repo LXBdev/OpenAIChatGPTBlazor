@@ -58,15 +58,20 @@ To use a local configuration, add user secrets with the following content:
 
 ```json
 {
-  "OpenAI": {
-    "ResourceName": "oai-myendpoint-eus",
-    "SelectableModels": "gpt-35-turbo", // Comma-separated list
-    "ApiKey": "xxx" // remove to use AAD auth
-  },
+  "OpenAI": [
+      {
+        "DeploymentName": "FastAndAccurate",
+        "Hint": "gpt-4o"
+      }
+  ],
+  "ConnectionStrings": {
+    //"OpenAi": "Endpoint=https://myoaiservice.openai.azure.com/;" // AAD Authentication
+    //"OpenAi": "Endpoint=https://myoaiservice.openai.azure.com/;Key=xxx;"
+  }
 }
 ```
 
-Provide your OpenAI API Key in the `ApiKey` field, or remove the field to use AAD authentication.
+Provide your OpenAI API Key in the `Key` field, or remove the field to use AAD authentication.
 
 ### Azure App Configuration
 

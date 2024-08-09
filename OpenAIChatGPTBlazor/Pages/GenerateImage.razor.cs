@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using OpenAIChatGPTBlazor.Components;
 using Azure.AI.OpenAI;
+using OpenAI;
 
 namespace OpenAIChatGPTBlazor.Pages
 {
@@ -9,7 +10,6 @@ namespace OpenAIChatGPTBlazor.Pages
     {
         private CancellationTokenSource? _searchCancellationTokenSource;
         private string _warningMessage = string.Empty;
-        private string _next = string.Empty;
         private bool _loading = true;
         private GenerateImageOptions _optionsComponent = new();
 
@@ -17,7 +17,7 @@ namespace OpenAIChatGPTBlazor.Pages
         private string _revisedPrompt = string.Empty;
 
         [Inject]
-        public IDictionary<string, OpenAIClient> OpenAIClients { get; set; } = new Dictionary<string, OpenAIClient>();
+        public OpenAIClient OpenAIClient { get; set; } = null!;
 
         protected override void OnAfterRender(bool firstRender)
         {
@@ -46,14 +46,13 @@ namespace OpenAIChatGPTBlazor.Pages
                 this.StateHasChanged();
 
                 _searchCancellationTokenSource = new CancellationTokenSource();
-                // TODO HACK
-                var res = await OpenAIClients.First().Value.GetImageGenerationsAsync(_optionsComponent.AsAzureOptions("Dalle3"), _searchCancellationTokenSource.Token);
 
-                foreach (var imageData in res.Value.Data)
-                {
-                    _imageUrl = imageData.Url;
-                    _revisedPrompt = imageData.RevisedPrompt;
-                }
+                var imageClient = OpenAIClient.GetImageClient("Dalle3");
+                // TODO Move prompt out of component into dedicated prompt component now?
+                var res = await imageClient.GenerateImageAsync(_optionsComponent.Prompt, _optionsComponent.AsAzureOptions("Dalle3"), _searchCancellationTokenSource.Token);
+
+                _imageUrl = res.Value.ImageUri;
+                _revisedPrompt = res.Value.RevisedPrompt;
 
                 _loading = false;
                 _warningMessage = string.Empty;
