@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using System.Globalization;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Components.Forms;
 using System.Text.Json;
 using OpenAI.Chat;
 using OpenAI;
@@ -32,6 +33,8 @@ namespace OpenAIChatGPTBlazor.Pages
         private bool _isTopRowToggled;
         private string _additionalTopRowClass = string.Empty;
         private string _SelectedOptionKey = string.Empty;
+        private OpenAIOptions? _SelectedOption;
+        private (string filename, BinaryData data, string mimeType)? _file = null;
 
         [Inject]
         public OpenAIClient OpenAIClient { get; set; } = null!;
@@ -44,8 +47,9 @@ namespace OpenAIChatGPTBlazor.Pages
 
         protected override void OnInitialized()
         {
-            var options = OpenAIOptions.CurrentValue.FirstOrDefault();
-            _SelectedOptionKey = options != null ? options.Key : _SelectedOptionKey;
+            var option = OpenAIOptions.CurrentValue.FirstOrDefault();
+            _SelectedOptionKey = option != null ? option.Key : _SelectedOptionKey;
+            _SelectedOption = option;
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -66,6 +70,18 @@ namespace OpenAIChatGPTBlazor.Pages
             {
                 // Highlight after load finished to avoid excessive flickering
                 await JS.InvokeVoidAsync("window.Prism.highlightAll");
+            }
+        }
+
+        private async Task LoadFiles(InputFileChangeEventArgs e)
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                var buffer = new byte[file.Size];
+                // TODO
+                await file.OpenReadStream(1_024_000_000).ReadAsync(buffer);
+                _file = (file.Name, new BinaryData(buffer), file.ContentType);
             }
         }
 
@@ -93,12 +109,20 @@ namespace OpenAIChatGPTBlazor.Pages
             {
                 _loading = true;
                 this.StateHasChanged();
-                _chatMessages.Add(new UserChatMessage(_next));
-
+                if (_file == null)
+                {
+                    _chatMessages.Add(new UserChatMessage(_next));
+                }
+                else
+                {
+                    _chatMessages.Add(new UserChatMessage(ChatMessageContentPart.CreateTextMessageContentPart(_next), 
+                        ChatMessageContentPart.CreateImageMessageContentPart(_file.Value.data, _file.Value.mimeType)));
+                    _file = null;
+                }
                 _next = string.Empty;
 
                 _searchCancellationTokenSource = new CancellationTokenSource();
-                var selectedOption = OpenAIOptions.CurrentValue.FirstOrDefault(x => x.Key == _SelectedOptionKey);
+                var selectedOption = _SelectedOption;
                 if (selectedOption is null)
                 {
                     throw new InvalidOperationException("Selected model is not found.");
@@ -213,6 +237,7 @@ namespace OpenAIChatGPTBlazor.Pages
         {
             await LocalStorage.SetItemAsync<bool>(IS_AUTOSCROLL_ENABLED, _isAutoscrollEnabled);
             await LocalStorage.SetItemAsync<string>(SELECTED_MODEL, _SelectedOptionKey);
+            _SelectedOption = OpenAIOptions.CurrentValue.FirstOrDefault(x => x.Key == _SelectedOptionKey);
         }
 
         async ValueTask IAsyncDisposable.DisposeAsync()
