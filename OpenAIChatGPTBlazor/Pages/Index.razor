@@ -19,9 +19,11 @@
         </button>
     </div>
     <div class="top-row p-4 header justify-content-between @_additionalTopRowClass">
-        <h4>
-            Welcome to my Chat using OpenAI
-        </h4>
+        <div>
+            <button class="btn btn-sm btn-secondary" @onclick="() => ResetChat()" title="New Chat (LocalStorage)">
+                <i class="fas fa-file-circle-plus"></i> New Chat
+            </button>
+        </div>
         <div>
             <EditForm style="display:inline" Model="@this">
                 <InputCheckbox id="isAutoscrollEnabled" @bind-Value="_isAutoscrollEnabled" @bind-Value:after="OnSettingsChanged" class="form-check-input" />
@@ -39,10 +41,10 @@
         </div>
     </div>
     <div @ref=_mainArea class="row main align-content-start p-4">
-        @foreach (var chatMessage in _chat.Messages)
+        @foreach (var chatMessage in _chatMessages)
         {
             <h5>
-                @chatMessage.Role
+                @GetChatMessageRole(chatMessage)
                 <button class="btn btn-sm" @onclick="() => CopyMessageToNext(chatMessage)" title="Copy as input">
                     <i class="fas fa-level-down-alt"></i>
                 </button>

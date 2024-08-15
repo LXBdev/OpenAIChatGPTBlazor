@@ -44,9 +44,9 @@ jobs:
       - name: Start Blazor server
         run: dotnet run --project ./OpenAIChatGPTBlazor/OpenAIChatGPTBlazor.csproj &
         env:
-          OpenAi__ResourceName : xxxxxxxxxample
-          OpenAi__SelectableModels : gpt12
-          OpenAi__ApiKey : nokey
+          OpenAi__DeploymentName: xxxxxxxxxample
+          OpenAi__Hint: xxxxxxxxxample
+          ConnectionStrings__openAi : Endpoint=https://myoaiservice.openai.azure.com/;Key=xxx;
 
       - name: Build Tests
         run: dotnet build ./Tests/UiTests/UiTests.csproj
