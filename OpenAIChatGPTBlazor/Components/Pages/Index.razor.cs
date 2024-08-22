@@ -11,7 +11,7 @@ namespace OpenAIChatGPTBlazor.Components.Pages
 {
     public partial class Index : IAsyncDisposable
     {
-        private const string SELECTED_MODEL = "SelectedModel";
+                private const string SELECTED_MODEL = "SelectedModel";
         private const string IS_AUTOSCROLL_ENABLED = "IsAutoscrollEnabled";
         private const string CHAT_HISTORY = "ChatHistoryV1";
 
