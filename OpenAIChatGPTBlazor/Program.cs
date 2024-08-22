@@ -23,9 +23,11 @@ if (opt != null && !string.IsNullOrEmpty(opt.Endpoint))
 }
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
+builder
+    .Services.AddRazorComponents()
     .AddInteractiveServerComponents()
-    .AddHubOptions(o => {
+    .AddHubOptions(o =>
+    {
         // Increase max message size so user can sent large input as part of conversation
         o.MaximumReceiveMessageSize = 10240000;
     });
@@ -51,15 +53,14 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.Run();
+
 public class AppConfigOptions
 {
     public string? Endpoint { get; set; }
     public string? Label { get; set; }
-
 }
 
 public class OpenAIOptions
@@ -67,5 +68,6 @@ public class OpenAIOptions
     public string? Hint { get; set; }
     public string? DeploymentName { get; set; }
     public string Key => $"{DeploymentName}-{Hint}";
+
     public override string ToString() => $"{DeploymentName} ({Hint})";
 }

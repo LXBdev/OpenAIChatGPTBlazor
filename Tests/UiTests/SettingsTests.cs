@@ -15,7 +15,10 @@ public class SettingsTests : PageTest
     public async Task SetUp()
     {
         await Page.GotoAsync(BasicTest.BaseUrl);
-        await Page.WaitForSelectorAsync("#searchBtn:not([disabled])", new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible });
+        await Page.WaitForSelectorAsync(
+            "#searchBtn:not([disabled])",
+            new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible }
+        );
     }
 
     [Test]
@@ -27,11 +30,18 @@ public class SettingsTests : PageTest
 
         // When
         await Page.ClickAsync("#isAutoscrollEnabled");
-        await Page.WaitForFunctionAsync($"() => localStorage.getItem('IsAutoscrollEnabled') !== '{checkedBefore}'");
+        await Page.WaitForFunctionAsync(
+            $"() => localStorage.getItem('IsAutoscrollEnabled') !== '{checkedBefore}'"
+        );
 
         // Then
-        var storedString = await Page.EvaluateAsync<string>("() => localStorage.getItem('IsAutoscrollEnabled')");
-        Assert.IsTrue(Boolean.TryParse(storedString, out var storedAfter), $"{storedString} expected to be a valid bool");
+        var storedString = await Page.EvaluateAsync<string>(
+            "() => localStorage.getItem('IsAutoscrollEnabled')"
+        );
+        Assert.IsTrue(
+            Boolean.TryParse(storedString, out var storedAfter),
+            $"{storedString} expected to be a valid bool"
+        );
         Assert.AreNotEqual(checkedBefore, storedAfter, "expected changed value");
     }
 
@@ -44,13 +54,21 @@ public class SettingsTests : PageTest
 
         // When setting is changed and page reloaded
         await Page.ClickAsync("#isAutoscrollEnabled");
-        await Page.WaitForFunctionAsync($"() => localStorage.getItem('IsAutoscrollEnabled') !== 'true'");
+        await Page.WaitForFunctionAsync(
+            $"() => localStorage.getItem('IsAutoscrollEnabled') !== 'true'"
+        );
         await Page.ReloadAsync();
 
-        await Page.WaitForSelectorAsync("#searchBtn:not([disabled])", new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible });
+        await Page.WaitForSelectorAsync(
+            "#searchBtn:not([disabled])",
+            new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible }
+        );
 
         // Then
         isChecked = await Page.IsCheckedAsync("#isAutoscrollEnabled");
-        Assert.IsFalse(isChecked, "Autoscroll should be disabled after reload because the setting should be persisted");
+        Assert.IsFalse(
+            isChecked,
+            "Autoscroll should be disabled after reload because the setting should be persisted"
+        );
     }
 }

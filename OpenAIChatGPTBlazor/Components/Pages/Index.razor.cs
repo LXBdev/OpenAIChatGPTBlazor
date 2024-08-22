@@ -1,11 +1,11 @@
+using System.Globalization;
+using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.JSInterop;
-using System.Globalization;
 using Microsoft.Extensions.Options;
-using System.Text.Json;
-using OpenAI.Chat;
+using Microsoft.JSInterop;
 using OpenAI;
+using OpenAI.Chat;
 
 namespace OpenAIChatGPTBlazor.Components.Pages
 {
@@ -38,9 +38,9 @@ namespace OpenAIChatGPTBlazor.Components.Pages
 
         [Inject]
         public IOptionsMonitor<List<OpenAIOptions>> OpenAIOptions { get; set; } = null!;
+
         [Inject]
         public ILogger<Index> Logger { get; set; } = null!;
-
 
         protected override void OnInitialized()
         {
@@ -52,10 +52,15 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         {
             if (firstRender)
             {
-                _module = await JS.InvokeAsync<IJSObjectReference>("import",
-                    "./Components/Pages/Index.razor.js");
-                _SelectedOptionKey = await LocalStorage.GetItemAsync<string>(SELECTED_MODEL) ?? _SelectedOptionKey;
-                _isAutoscrollEnabled = await LocalStorage.GetItemAsync<bool?>(IS_AUTOSCROLL_ENABLED) ?? _isAutoscrollEnabled;
+                _module = await JS.InvokeAsync<IJSObjectReference>(
+                    "import",
+                    "./Components/Pages/Index.razor.js"
+                );
+                _SelectedOptionKey =
+                    await LocalStorage.GetItemAsync<string>(SELECTED_MODEL) ?? _SelectedOptionKey;
+                _isAutoscrollEnabled =
+                    await LocalStorage.GetItemAsync<bool?>(IS_AUTOSCROLL_ENABLED)
+                    ?? _isAutoscrollEnabled;
                 await InitiateChat();
 
                 _loading = false;
@@ -98,7 +103,9 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 _next = string.Empty;
 
                 _searchCancellationTokenSource = new CancellationTokenSource();
-                var selectedOption = OpenAIOptions.CurrentValue.FirstOrDefault(x => x.Key == _SelectedOptionKey);
+                var selectedOption = OpenAIOptions.CurrentValue.FirstOrDefault(x =>
+                    x.Key == _SelectedOptionKey
+                );
                 if (selectedOption is null)
                 {
                     throw new InvalidOperationException("Selected model is not found.");
@@ -127,7 +134,8 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 _stream = string.Empty;
                 _warningMessage = string.Empty;
             }
-            catch (TaskCanceledException) when (_searchCancellationTokenSource?.IsCancellationRequested == true)
+            catch (TaskCanceledException)
+                when (_searchCancellationTokenSource?.IsCancellationRequested == true)
             {
                 // Gracefully handle cancellation
             }
@@ -145,7 +153,10 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         {
             try
             {
-                if (_searchCancellationTokenSource?.Token != null && _searchCancellationTokenSource.Token.CanBeCanceled)
+                if (
+                    _searchCancellationTokenSource?.Token != null
+                    && _searchCancellationTokenSource.Token.CanBeCanceled
+                )
                 {
                     _searchCancellationTokenSource.Cancel();
                 }
@@ -199,7 +210,7 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 SystemChatMessage => ROLE_SYSTEM,
                 UserChatMessage => ROLE_USER,
                 AssistantChatMessage => ROLE_ASSISTANT,
-                _ => "unknown"
+                _ => "unknown",
             };
         }
 
@@ -233,7 +244,11 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         private async Task ResetChat()
         {
             _chatMessages.Clear();
-            _chatMessages.Add(new SystemChatMessage($"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}."));
+            _chatMessages.Add(
+                new SystemChatMessage(
+                    $"You are the assistant of a software engineer mainly working with .NET and Azure. Today is {DateTimeOffset.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}."
+                )
+            );
 
             await StoreChatHistory();
         }
@@ -245,10 +260,19 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             {
                 var a = item switch
                 {
-                    SystemChatMessage message => new MyChatMessage(ROLE_SYSTEM, GetChatMessageContent(message)),
-                    UserChatMessage message => new MyChatMessage(ROLE_USER, GetChatMessageContent(message)),
-                    AssistantChatMessage message => new MyChatMessage(ROLE_ASSISTANT, GetChatMessageContent(message)),
-                    _ => new MyChatMessage("", "")
+                    SystemChatMessage message => new MyChatMessage(
+                        ROLE_SYSTEM,
+                        GetChatMessageContent(message)
+                    ),
+                    UserChatMessage message => new MyChatMessage(
+                        ROLE_USER,
+                        GetChatMessageContent(message)
+                    ),
+                    AssistantChatMessage message => new MyChatMessage(
+                        ROLE_ASSISTANT,
+                        GetChatMessageContent(message)
+                    ),
+                    _ => new MyChatMessage("", ""),
                 };
                 mapped.Add(a);
             }
@@ -293,7 +317,7 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 {
                     { role: ROLE_SYSTEM } message => new SystemChatMessage(message.message),
                     { role: ROLE_ASSISTANT } message => new AssistantChatMessage(message.message),
-                    _ => new UserChatMessage(item.message)
+                    _ => new UserChatMessage(item.message),
                 };
 
                 result.Add(a);

@@ -8,7 +8,8 @@ namespace UiTests;
 [TestFixture]
 public class BasicTest : PageTest
 {
-    public static string BaseUrl = Environment.GetEnvironmentVariable("AppUrl") ?? "https://localhost:7128/";
+    public static string BaseUrl =
+        Environment.GetEnvironmentVariable("AppUrl") ?? "https://localhost:7128/";
 
     [SetUp]
     public async Task SetUp()
@@ -19,6 +20,7 @@ public class BasicTest : PageTest
     [Test]
     public async Task SystemMessageShouldBePreset()
     {
-        await Expect(Page.GetByText("You are the assistant of a software engineer" )).ToBeVisibleAsync();
+        await Expect(Page.GetByText("You are the assistant of a software engineer"))
+            .ToBeVisibleAsync();
     }
 }
