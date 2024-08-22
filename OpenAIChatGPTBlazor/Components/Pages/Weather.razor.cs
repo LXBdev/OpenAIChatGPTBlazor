@@ -1,4 +1,4 @@
-namespace blazorNew.Components.Pages
+namespace OpenAIChatGPTBlazor.Components.Pages
 {
     public partial class Weather
     {

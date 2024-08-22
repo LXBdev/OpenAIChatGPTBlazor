@@ -7,7 +7,7 @@ using System.Text.Json;
 using OpenAI.Chat;
 using OpenAI;
 
-namespace blazorNew.Components.Pages
+namespace OpenAIChatGPTBlazor.Components.Pages
 {
     public partial class Index : IAsyncDisposable
     {

@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Azure.AI.OpenAI;
 using OpenAI;
-using blazorNew.Components;
+using OpenAIChatGPTBlazor.Components;
 
-namespace blazorNew.Components.Pages
+namespace OpenAIChatGPTBlazor.Components.Pages
 {
     public partial class GenerateImage
     {

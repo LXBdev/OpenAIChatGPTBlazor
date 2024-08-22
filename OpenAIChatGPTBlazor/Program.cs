@@ -1,7 +1,7 @@
 using Azure.Identity;
 using Blazored.LocalStorage;
 using Microsoft.FeatureManagement;
-using blazorNew.Components;
+using OpenAIChatGPTBlazor.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
