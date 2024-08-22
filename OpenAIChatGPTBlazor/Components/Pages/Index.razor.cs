@@ -7,7 +7,7 @@ using System.Text.Json;
 using OpenAI.Chat;
 using OpenAI;
 
-namespace OpenAIChatGPTBlazor.Pages
+namespace blazorNew.Components.Pages
 {
     public partial class Index : IAsyncDisposable
     {
@@ -53,7 +53,7 @@ namespace OpenAIChatGPTBlazor.Pages
             if (firstRender)
             {
                 _module = await JS.InvokeAsync<IJSObjectReference>("import",
-                    "./Pages/Index.razor.js");
+                    "./Components/Pages/Index.razor.js");
                 _SelectedOptionKey = await LocalStorage.GetItemAsync<string>(SELECTED_MODEL) ?? _SelectedOptionKey;
                 _isAutoscrollEnabled = await LocalStorage.GetItemAsync<bool?>(IS_AUTOSCROLL_ENABLED) ?? _isAutoscrollEnabled;
                 await InitiateChat();
