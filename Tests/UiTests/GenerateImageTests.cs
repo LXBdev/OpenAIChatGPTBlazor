@@ -8,7 +8,6 @@ namespace UiTests;
 [TestFixture]
 public class GenerateImageTests : PageTest
 {
-
     [SetUp]
     public async Task SetUp()
     {
@@ -18,6 +17,7 @@ public class GenerateImageTests : PageTest
     [Test]
     public async Task PageShouldLoadAndShowHeading()
     {
-        await Expect(Page.GetByText("Welcome to my Image Generation using OpenAI")).ToBeVisibleAsync();
+        await Expect(Page.GetByText("Welcome to my Image Generation using OpenAI"))
+            .ToBeVisibleAsync();
     }
 }

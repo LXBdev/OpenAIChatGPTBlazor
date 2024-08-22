@@ -18,11 +18,19 @@ public class FocusTests : PageTest
     public async Task NextAreaShouldHaveFocusAfterLoading()
     {
         // Wait for submit button to be enabled
-        await Page.WaitForSelectorAsync("#searchBtn:not([disabled])", new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible });
+        await Page.WaitForSelectorAsync(
+            "#searchBtn:not([disabled])",
+            new PageWaitForSelectorOptions { State = WaitForSelectorState.Visible }
+        );
 
         // Check if the textarea with id="nextArea" is focused after loading disappears.
-        var isNextAreaFocused = await Page.EvaluateAsync<bool>("document.activeElement.id === 'nextArea'");
+        var isNextAreaFocused = await Page.EvaluateAsync<bool>(
+            "document.activeElement.id === 'nextArea'"
+        );
 
-        Assert.IsTrue(isNextAreaFocused, "Expected nextArea to have focus after loading is finished.");
+        Assert.IsTrue(
+            isNextAreaFocused,
+            "Expected nextArea to have focus after loading is finished."
+        );
     }
 }

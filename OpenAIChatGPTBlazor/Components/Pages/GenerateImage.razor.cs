@@ -1,6 +1,6 @@
+using Azure.AI.OpenAI;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Azure.AI.OpenAI;
 using OpenAI;
 using OpenAIChatGPTBlazor.Components;
 
@@ -49,7 +49,11 @@ namespace OpenAIChatGPTBlazor.Components.Pages
 
                 var imageClient = OpenAIClient.GetImageClient("Dalle3");
                 // TODO Move prompt out of component into dedicated prompt component now?
-                var res = await imageClient.GenerateImageAsync(_optionsComponent.Prompt, _optionsComponent.AsAzureOptions("Dalle3"), _searchCancellationTokenSource.Token);
+                var res = await imageClient.GenerateImageAsync(
+                    _optionsComponent.Prompt,
+                    _optionsComponent.AsAzureOptions("Dalle3"),
+                    _searchCancellationTokenSource.Token
+                );
 
                 _imageUrl = res.Value.ImageUri;
                 _revisedPrompt = res.Value.RevisedPrompt;
@@ -57,7 +61,8 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 _loading = false;
                 _warningMessage = string.Empty;
             }
-            catch (TaskCanceledException) when (_searchCancellationTokenSource?.IsCancellationRequested == true)
+            catch (TaskCanceledException)
+                when (_searchCancellationTokenSource?.IsCancellationRequested == true)
             {
                 // Gracefully handle cancellation
             }
@@ -75,7 +80,10 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         {
             try
             {
-                if (_searchCancellationTokenSource?.Token != null && _searchCancellationTokenSource.Token.CanBeCanceled)
+                if (
+                    _searchCancellationTokenSource?.Token != null
+                    && _searchCancellationTokenSource.Token.CanBeCanceled
+                )
                 {
                     _searchCancellationTokenSource.Cancel();
                 }
