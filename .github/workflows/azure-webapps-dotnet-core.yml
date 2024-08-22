@@ -56,8 +56,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nuget-
 
-      - name: dotnet restore
-        run: dotnet restore
+      - name: linting / csharpier
+        run: | 
+          dotnet tool restore
+          dotnet csharpier --check .
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
