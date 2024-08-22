@@ -28,6 +28,14 @@
         "plugins/toolbar/prism-toolbar.min.js",
         "plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"
       ]
+    },
+    {
+      "library": "font-awesome@6.6.0",
+      "destination": "wwwroot/lib/font-awesome/",
+      "files": [
+        "css/all.min.css",
+        "webfonts/fa-solid-900.woff2"
+      ]
     }
   ]
 }

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using OpenAIChatGPTBlazor.Components;
 using Azure.AI.OpenAI;
 using OpenAI;
+using OpenAIChatGPTBlazor.Components;
 
-namespace OpenAIChatGPTBlazor.Pages
+namespace OpenAIChatGPTBlazor.Components.Pages
 {
     public partial class GenerateImage
     {

@@ -1,6 +1,7 @@
 using Azure.Identity;
 using Blazored.LocalStorage;
 using Microsoft.FeatureManagement;
+using OpenAIChatGPTBlazor.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -21,14 +22,13 @@ if (opt != null && !string.IsNullOrEmpty(opt.Endpoint))
     });
 }
 
-builder.Services.AddRazorPages();
-builder.Services.AddServerSideBlazor()
-    .AddHubOptions(o =>
-    {
+// Add services to the container.
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents()
+    .AddHubOptions(o => {
         // Increase max message size so user can sent large input as part of conversation
         o.MaximumReceiveMessageSize = 10240000;
     });
-
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddFeatureManagement();
@@ -38,23 +38,23 @@ builder.AddAzureOpenAIClient("OpenAi");
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+app.UseAntiforgery();
 
-app.UseRouting();
-
-app.MapBlazorHub();
-app.MapFallbackToPage("/_Host");
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
 app.Run();
-
 public class AppConfigOptions
 {
     public string? Endpoint { get; set; }
