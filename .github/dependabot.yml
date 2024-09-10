@@ -13,4 +13,4 @@ updates:
       csharpier:
         applies-to: version-updates
         patterns:
-          - "^[Cc][Ss]harpier\."
+          - "^[Cc][Ss]harpier*"
