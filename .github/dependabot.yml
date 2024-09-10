@@ -13,4 +13,5 @@ updates:
       csharpier:
         applies-to: version-updates
         patterns:
-          - "^[Cc][Ss]harpier*"
+          - "csharpier*"
+          - "CSharpier.MsBuild*"
