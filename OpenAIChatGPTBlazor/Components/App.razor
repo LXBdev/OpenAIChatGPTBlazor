@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -13,6 +13,9 @@
     <link rel="stylesheet" href="lib/prism/themes/prism.min.css">
     <link rel="stylesheet" href="lib/prism/plugins/toolbar/prism-toolbar.min.css">
     <link rel="stylesheet" href="lib/font-awesome/css/all.min.css" />
+    <link href="manifest.webmanifest" rel="manifest" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
     <HeadOutlet />
 </head>
 
@@ -39,6 +42,7 @@
     <script src="lib/prism/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
 
     <script src="_framework/blazor.web.js"></script>
+    <script>navigator.serviceWorker.register('service-worker.js');</script>
 </body>
 
 </html>
