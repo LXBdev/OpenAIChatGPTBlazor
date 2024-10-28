@@ -13,7 +13,7 @@
 		<PackageReference Include="Azure.Identity" Version="1.12.0" />
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
 		<PackageReference Include="Markdig" Version="0.38.0" />
-		<PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="7.3.0" />
+		<PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.0.0" />
 		<PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.5.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets"
 			Version="1.21.0" />
