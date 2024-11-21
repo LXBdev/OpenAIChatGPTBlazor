@@ -15,7 +15,7 @@ This is a Blazor WebAssembly application that uses OpenAI GPT-3.5 Turbo to enabl
 
 ## Requirements
 
-- .NET 6.0 SDK
+- .NET 8.0 SDK
 - Azure App Configuration (optional)
 
 ## Installation
