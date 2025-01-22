@@ -1,8 +1,5 @@
 name: Run UI Tests
 
-env:
-  DOTNET_VERSION: '6.0.*'                 # set this to the .NET Core version to use
-
 on:
   push:
     branches: [ "main" ]
@@ -23,7 +20,7 @@ jobs:
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          global-json-file: global.json
 
       - name: Set up nuget dependency caching for faster builds
         uses: actions/cache@v4

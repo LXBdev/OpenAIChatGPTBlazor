@@ -9,14 +9,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aspire.Azure.AI.OpenAI" Version="8.1.0-preview.1.24373.2" />
+		<PackageReference Include="Aspire.Azure.AI.OpenAI" Version="8.2.2-preview.1.24521.5" />
 		<PackageReference Include="Azure.Identity" Version="1.12.0" />
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
 		<PackageReference Include="Markdig" Version="0.40.0" />
 		<PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.0.0" />
 		<PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="3.5.0" />
-		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets"
-			Version="1.21.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
 		<PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
 		<PackageReference Include="CSharpier.MsBuild" Version="0.30.6">
 			<PrivateAssets>all</PrivateAssets>

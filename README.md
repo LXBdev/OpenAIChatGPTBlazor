@@ -60,8 +60,8 @@ To use a local configuration, add user secrets with the following content:
 {
   "OpenAI": [
       {
-        "DeploymentName": "FastAndAccurate",
-        "Hint": "gpt-4o"
+        "DeploymentName": "gpt-4o",
+        "Hint": "FastAndAccurate"
       }
   ],
   "ConnectionStrings": {
