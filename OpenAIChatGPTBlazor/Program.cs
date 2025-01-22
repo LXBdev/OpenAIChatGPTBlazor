@@ -69,5 +69,11 @@ public class OpenAIOptions
     public string? DeploymentName { get; set; }
     public string Key => $"{DeploymentName}-{Hint}";
 
+    // Special stuff for o1
+    public bool HasStreamingSupport { get; set; }
+
+    // Special stuff for o1
+    public bool HasSystemMessageSupport { get; set; } = true;
+
     public override string ToString() => $"{DeploymentName} ({Hint})";
 }

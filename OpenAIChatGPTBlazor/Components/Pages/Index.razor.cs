@@ -103,30 +103,50 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 _next = string.Empty;
 
                 _searchCancellationTokenSource = new CancellationTokenSource();
-                var selectedOption = OpenAIOptions.CurrentValue.FirstOrDefault(x =>
-                    x.Key == _SelectedOptionKey
-                );
-                if (selectedOption is null)
-                {
-                    throw new InvalidOperationException("Selected model is not found.");
-                }
+                var selectedOption =
+                    OpenAIOptions.CurrentValue.FirstOrDefault(x => x.Key == _SelectedOptionKey)
+                    ?? throw new InvalidOperationException("Selected model was not found.");
+
                 var client = OpenAIClient.GetChatClient(selectedOption.DeploymentName);
 
-                var updates = client.CompleteChatStreamingAsync(_chatMessages);
-                await foreach (StreamingChatCompletionUpdate update in updates)
+                if (!selectedOption.HasSystemMessageSupport)
                 {
-                    foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
-                    {
-                        _stream += updatePart.Text;
-                        this.StateHasChanged();
-                        if (_isAutoscrollEnabled && _module is not null)
-                        {
-                            await _module.InvokeVoidAsync("scrollElementToEnd", _mainArea);
-                        }
-                    }
+                    // Not ideal solution, but will do for now
+                    // Proper solution will be to use "developer" messages instead of system once they become available
+                    _chatMessages = _chatMessages
+                        .Select(x =>
+                            x switch
+                            {
+                                SystemChatMessage message => new UserChatMessage(message.Content),
+                                _ => x,
+                            }
+                        )
+                        .ToList();
                 }
 
-                _chatMessages.Add(new AssistantChatMessage(_stream));
+                if (selectedOption.HasStreamingSupport)
+                {
+                    var updates = client.CompleteChatStreamingAsync(_chatMessages);
+                    await foreach (StreamingChatCompletionUpdate update in updates)
+                    {
+                        foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
+                        {
+                            _stream += updatePart.Text;
+                            this.StateHasChanged();
+                            if (_isAutoscrollEnabled && _module is not null)
+                            {
+                                await _module.InvokeVoidAsync("scrollElementToEnd", _mainArea);
+                            }
+                        }
+                    }
+
+                    _chatMessages.Add(new AssistantChatMessage(_stream));
+                }
+                else
+                {
+                    var result = await client.CompleteChatAsync(_chatMessages);
+                    _chatMessages.Add(new AssistantChatMessage(result.Value.Content));
+                }
 
                 await StoreChatHistory();
 
