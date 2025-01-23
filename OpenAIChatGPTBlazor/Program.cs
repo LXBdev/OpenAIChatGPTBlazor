@@ -70,7 +70,7 @@ public class OpenAIOptions
     public string Key => $"{DeploymentName}-{Hint}";
 
     // Special stuff for o1
-    public bool HasStreamingSupport { get; set; }
+    public bool HasStreamingSupport { get; set; } = true;
 
     // Special stuff for o1
     public bool HasSystemMessageSupport { get; set; } = true;
