@@ -67,6 +67,7 @@ To use a local configuration, add user secrets with the following content:
   "ConnectionStrings": {
     //"OpenAi": "Endpoint=https://myoaiservice.openai.azure.com/;" // AAD Authentication
     //"OpenAi": "Endpoint=https://myoaiservice.openai.azure.com/;Key=xxx;"
+    //"OpenAi_Image_": "Endpoint=https://myoaiservice.openai.azure.com/;Key=xxx;" // Secondary endpoint for image generation
   }
 }
 ```

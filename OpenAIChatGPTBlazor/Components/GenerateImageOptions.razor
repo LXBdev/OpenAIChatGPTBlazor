@@ -1,4 +1,4 @@
-﻿@using Azure.AI.OpenAI
+@using Azure.AI.OpenAI
 @using OpenAI.Images
 <EditForm Model="@this">
     <div class="form-group">
@@ -8,18 +8,15 @@
         <label for="size">Size</label>
         <InputSelect @bind-Value="_size">
             <option value="1024x1024">1024x1024</option>
-            <option value="1792x1024">1792x1024</option>
-            <option value="1024x1792">1024x1792</option>
+            <option value="1024x1536">1024x1536</option>
+            <option value="1536x1024">1536x1024</option>
         </InputSelect>
         <label for="quality">Quality</label>
         <InputSelect id="quality" name="quality" @bind-Value="_quality">
-            <option value="Standard">Standard</option>
-            <option value="HD">HD</option>
-        </InputSelect>
-        <label for="style">Style</label>
-        <InputSelect id="style" name="style" @bind-Value="_style">
-            <option value="Natural">Natural</option>
-            <option value="Vivid">Vivid</option>
+            <option value="auto">Auto</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
         </InputSelect>
     </div>
 </EditForm>
@@ -29,17 +26,15 @@
     [Parameter]
     public string Prompt { get; set; } = string.Empty;
 
-    private string _size = GeneratedImageSize.W1024xH1024.ToString();
-    private string _quality = GeneratedImageQuality.Standard.ToString();
-    private string _style = GeneratedImageStyle.Natural.ToString();
+    private string _size = "1024x1024";
+    private string _quality = "high";
 
     public ImageGenerationOptions AsAzureOptions(string deploymentName)
     {
         return new()
             {
                 Size = new GeneratedImageSize(int.Parse(_size.Split("x")[0]), int.Parse(_size.Split("x")[1])),
-                Quality = Enum.Parse<GeneratedImageQuality>(_quality),
-                Style = Enum.Parse<GeneratedImageStyle>(_style)
+                Quality = new GeneratedImageQuality(_quality)
             };
     }
 }

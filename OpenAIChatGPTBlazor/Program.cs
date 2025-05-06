@@ -27,16 +27,16 @@ builder
     .Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddHubOptions(o =>
-    {
         // Increase max message size so user can sent large input as part of conversation
-        o.MaximumReceiveMessageSize = 10240000;
-    });
+        o.MaximumReceiveMessageSize = 10240000
+    );
 
 builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddFeatureManagement();
 builder.Services.Configure<List<OpenAIOptions>>(builder.Configuration.GetSection("OpenAI"));
 
-builder.AddAzureOpenAIClient("OpenAi");
+builder.AddKeyedAzureOpenAIClient("OpenAi");
+builder.AddKeyedAzureOpenAIClient("OpenAi_Image");
 
 var app = builder.Build();
 
