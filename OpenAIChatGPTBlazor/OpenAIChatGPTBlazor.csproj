@@ -9,8 +9,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aspire.Azure.AI.OpenAI" Version="8.2.1-preview.1.24473.4" />
-		<PackageReference Include="Azure.Identity" Version="1.12.0" />
+		<PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.2.1-preview.1.25222.1" />
+		<PackageReference Include="Azure.Identity" Version="1.13.2" />
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
 		<PackageReference Include="Markdig" Version="0.40.0" />
 		<PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.0.0" />

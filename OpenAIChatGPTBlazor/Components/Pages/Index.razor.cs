@@ -33,7 +33,7 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         private string _additionalTopRowClass = string.Empty;
         private string _SelectedOptionKey = string.Empty;
 
-        [Inject]
+        [Inject(Key = "OpenAi")]
         public OpenAIClient OpenAIClient { get; set; } = null!;
 
         [Inject]

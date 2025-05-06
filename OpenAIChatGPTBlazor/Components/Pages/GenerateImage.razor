@@ -1,4 +1,4 @@
-﻿@page "/GenerateImage"
+@page "/GenerateImage"
 @rendermode InteractiveServer
 @using System.Globalization
 @using Microsoft.Extensions.Options;
@@ -36,6 +36,10 @@
         @if (_imageUrl is not null)
         {
             <img src="@_imageUrl" class="img-fluid" />
+        }
+        @if (_imageBytes is not null)
+        {
+            <img src="data:image;base64, @System.Convert.ToBase64String(_imageBytes)" class="img-fluid" />
         }
     </div>
     <hr />
