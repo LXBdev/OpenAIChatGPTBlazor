@@ -39,7 +39,7 @@
         }
         @if (_imageBytes is not null)
         {
-            <img src="data:image;base64, @System.Convert.ToBase64String(_imageBytes)" class="img-fluid" />
+            <img src="data:image/png;base64, @System.Convert.ToBase64String(_imageBytes)" class="img-fluid" />
         }
     </div>
     <hr />
