@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
 using OpenAI;
 
 namespace OpenAIChatGPTBlazor.Components.Pages
@@ -9,6 +10,8 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         private string _warningMessage = string.Empty;
         private bool _loading = true;
         private GenerateImageOptions _optionsComponent = new();
+
+        private string _prompt = string.Empty;
 
         private Uri? _imageUrl = null;
         private BinaryData? _imageBytes = null;
@@ -28,6 +31,14 @@ namespace OpenAIChatGPTBlazor.Components.Pages
 
         private async Task OnSubmitClick() => await RunSubmit();
 
+        private async Task OnPromptKeydown(KeyboardEventArgs e)
+        {
+            if ((e.Key == "Enter" || e.Key == "NumpadEnter") && e.CtrlKey)
+            {
+                await RunSubmit();
+            }
+        }
+
         private void OnAbortClick() => AbortSearch();
 
         private async Task RunSubmit()
@@ -40,9 +51,8 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 _searchCancellationTokenSource = new CancellationTokenSource();
 
                 var imageClient = OpenAIClient.GetImageClient("gpt-image-1");
-                // TODO Move prompt out of component into dedicated prompt component now?
                 var res = await imageClient.GenerateImageAsync(
-                    _optionsComponent.Prompt,
+                    _prompt,
                     _optionsComponent.AsAzureOptions("gpt-image-1"),
                     _searchCancellationTokenSource.Token
                 );

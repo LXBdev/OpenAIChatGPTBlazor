@@ -45,7 +45,9 @@
     <hr />
     <div class="row footer">
         <div class="col-sm-8">
-            <GenerateImageOptions @ref="_optionsComponent" />
+            <textarea type="text" class="form-control" id="nextArea" placeholder="CTRL+Enter to submit image generation"
+                      @bind="_prompt" @bind:event="oninput" @onkeydown="OnPromptKeydown">
+            </textarea>
         </div>
         <br />
         <div class="col-sm-2">
@@ -55,6 +57,9 @@
             <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled="@(!_loading)">
                 <i class="fas"></i>Abort
             </button>
+        </div>
+        <div class="col-12 mb-2">
+            <GenerateImageOptions @ref="_optionsComponent" />
         </div>
     </div>
 </article>

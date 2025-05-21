@@ -1,9 +1,7 @@
 @using Azure.AI.OpenAI
 @using OpenAI.Images
+
 <EditForm Model="@this">
-    <div class="form-group">
-        <InputTextArea class="form-control" placeholder="Prompt" @bind-Value="Prompt" />
-    </div>
     <div class="form-group">
         <label for="size">Size</label>
         <InputSelect @bind-Value="_size">
@@ -23,18 +21,15 @@
 
 
 @code {
-    [Parameter]
-    public string Prompt { get; set; } = string.Empty;
-
     private string _size = "1024x1024";
     private string _quality = "high";
 
     public ImageGenerationOptions AsAzureOptions(string deploymentName)
     {
         return new()
-            {
-                Size = new GeneratedImageSize(int.Parse(_size.Split("x")[0]), int.Parse(_size.Split("x")[1])),
-                Quality = new GeneratedImageQuality(_quality)
-            };
+        {
+            Size = new GeneratedImageSize(int.Parse(_size.Split("x")[0]), int.Parse(_size.Split("x")[1])),
+            Quality = new GeneratedImageQuality(_quality)
+        };
     }
 }
