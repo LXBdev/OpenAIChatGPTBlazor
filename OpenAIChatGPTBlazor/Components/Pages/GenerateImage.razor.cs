@@ -13,8 +13,8 @@ namespace OpenAIChatGPTBlazor.Components.Pages
 
         private string _prompt = string.Empty;
 
-        private Uri? _imageUrl = null;
-        private BinaryData? _imageBytes = null;
+        private readonly List<Uri> _imageUrls = new();
+        private readonly List<BinaryData> _imageBytesList = new();
         private string _revisedPrompt = string.Empty;
 
         [Inject(Key = "OpenAi_Image")]
@@ -48,18 +48,34 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 _loading = true;
                 StateHasChanged();
 
+                _searchCancellationTokenSource?.Dispose();
                 _searchCancellationTokenSource = new CancellationTokenSource();
 
                 var imageClient = OpenAIClient.GetImageClient("gpt-image-1");
-                var res = await imageClient.GenerateImageAsync(
+                var res = await imageClient.GenerateImagesAsync(
                     _prompt,
+                    _optionsComponent.ImageCount,
                     _optionsComponent.AsAzureOptions("gpt-image-1"),
                     _searchCancellationTokenSource.Token
                 );
 
-                _imageUrl = res.Value.ImageUri;
-                _imageBytes = res.Value.ImageBytes;
-                _revisedPrompt = res.Value.RevisedPrompt;
+                _imageUrls.Clear();
+                _imageBytesList.Clear();
+                foreach (var img in res.Value)
+                {
+                    if (img.ImageUri != null)
+                    {
+                        _imageUrls.Add(img.ImageUri);
+                    }
+                    if (img.ImageBytes != null)
+                    {
+                        _imageBytesList.Add(img.ImageBytes);
+                    }
+                    if (!string.IsNullOrWhiteSpace(img.RevisedPrompt))
+                    {
+                        _revisedPrompt = img.RevisedPrompt;
+                    }
+                }
 
                 _loading = false;
                 _warningMessage = string.Empty;

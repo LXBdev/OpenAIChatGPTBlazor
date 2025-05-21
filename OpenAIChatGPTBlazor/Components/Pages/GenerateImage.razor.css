@@ -72,8 +72,25 @@
     height: auto; /* Optional: Ensures the height is auto-adjusted */
 }
 
-    .img-container img {
-        max-width: 100%; /* Ensures the image doesn’t exceed the width of its container */
-        height: auto; /* Maintains the aspect ratio of the image */
-        display: block; /* Removes any extra space at the bottom inside the container */
-    }
+.img-container img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+    box-shadow: 0 4px 32px #0002;
+    margin-bottom: 1.5rem;
+}
+.generated-image {
+    width: 100%;
+    max-width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
+    cursor: pointer;
+    border-radius: 12px;
+    box-shadow: 0 4px 32px #0002;
+    margin-bottom: 1.5rem;
+    transition: box-shadow 0.2s;
+}
+.generated-image:hover {
+    box-shadow: 0 8px 48px #0006;
+}

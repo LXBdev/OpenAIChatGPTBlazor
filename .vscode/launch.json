@@ -5,12 +5,19 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": ".NET Core Launch (web)",
+      "name": ".NET Core Launch (web, watch debug)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/OpenAIChatGPTBlazor/bin/Debug/net8.0/OpenAIChatGPTBlazor.dll",
-      "args": [],
+      "program": "dotnet",
+      "args": [
+        "watch",
+        "--project",
+        "${workspaceFolder}/OpenAIChatGPTBlazor/",
+        "--",
+        "run",
+        "--no-launch-profile"
+      ],
       "cwd": "${workspaceFolder}/OpenAIChatGPTBlazor",
       "stopAtEntry": false,
       "serverReadyAction": {

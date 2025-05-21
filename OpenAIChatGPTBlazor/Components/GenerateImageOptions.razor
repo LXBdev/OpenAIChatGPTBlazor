@@ -3,19 +3,35 @@
 
 <EditForm Model="@this">
     <div class="form-group">
-        <label for="size">Size</label>
-        <InputSelect @bind-Value="_size">
-            <option value="1024x1024">1024x1024</option>
-            <option value="1024x1536">1024x1536</option>
-            <option value="1536x1024">1536x1024</option>
-        </InputSelect>
-        <label for="quality">Quality</label>
-        <InputSelect id="quality" name="quality" @bind-Value="_quality">
-            <option value="auto">Auto</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-        </InputSelect>
+        <div class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label for="size" class="col-form-label">Size</label>
+            </div>
+            <div class="col-auto">
+                <InputSelect @bind-Value="_size" class="form-select form-select-sm" style="min-width: 120px;">
+                    <option value="1024x1024">1024x1024</option>
+                    <option value="1024x1536">1024x1536</option>
+                    <option value="1536x1024">1536x1024</option>
+                </InputSelect>
+            </div>
+            <div class="col-auto">
+                <label for="quality" class="col-form-label">Quality</label>
+            </div>
+            <div class="col-auto">
+                <InputSelect id="quality" name="quality" @bind-Value="_quality" class="form-select form-select-sm" style="min-width: 90px;">
+                    <option value="auto">Auto</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </InputSelect>
+            </div>
+            <div class="col-auto">
+                <label for="imageCount" class="col-form-label">Image Count</label>
+            </div>
+            <div class="col-auto">
+                <InputNumber id="imageCount" @bind-Value="_imageCount" min="1" max="10" class="form-control form-control-sm" style="width: 70px;" />
+            </div>
+        </div>
     </div>
 </EditForm>
 
@@ -23,6 +39,10 @@
 @code {
     private string _size = "1024x1024";
     private string _quality = "high";
+
+    private int _imageCount = 4;
+
+    public int ImageCount => _imageCount;
 
     public ImageGenerationOptions AsAzureOptions(string deploymentName)
     {
