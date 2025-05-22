@@ -78,8 +78,19 @@
     <div class="row footer">
         <div class="col-sm-8">
             <textarea type="text" class="form-control" id="nextArea" placeholder="CTRL+Enter to submit search"
-                      @bind="_next" @bind:event="oninput" @onkeydown="@OnNextKeydown" @ref=_nextArea>
-        </textarea>
+                      @bind="_next" @bind:event="oninput" @onkeydown="@OnNextKeydown" @ref="_nextArea"></textarea>
+            <div class="mt-2 d-flex align-items-center gap-2">
+                @if (_file != null)
+                {
+                    <div class="img-container d-flex align-items-center gap-2">
+                        <img src="@_imagePreviewUrl" alt="Preview" style="max-width:200px;max-height:120px;border-radius:8px;" />
+                        <button type="button" class="btn btn-outline-danger btn-sm ms-2" title="Remove image" @onclick="ClearFile">
+                            <i class="fas fa-times"></i> Remove
+                        </button>
+                    </div>
+                }
+            </div>
+
         </div>
         <br />
         <div class="col-sm-2">

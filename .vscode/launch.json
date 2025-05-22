@@ -15,7 +15,7 @@
         "--project",
         "${workspaceFolder}/OpenAIChatGPTBlazor/",
         "--",
-        "run",
+        "debug",
         "--no-launch-profile"
       ],
       "cwd": "${workspaceFolder}/OpenAIChatGPTBlazor",
