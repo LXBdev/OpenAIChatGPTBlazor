@@ -53,9 +53,10 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         {
             if (firstRender)
             {
+                // Dynamically load JavaScript with cache busting
                 _module = await JS.InvokeAsync<IJSObjectReference>(
                     "import",
-                    "./Components/Pages/Index.razor.js"
+                    $"./Components/Pages/Index.razor.js?v={DateTime.Now.Ticks}"
                 );
                 _SelectedOptionKey =
                     await LocalStorage.GetItemAsync<string>(SELECTED_MODEL) ?? _SelectedOptionKey;
