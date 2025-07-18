@@ -240,7 +240,9 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             }
         }
 
-        private async Task OnFileSelected(Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs e)
+        private async Task OnFileSelected(
+            Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs e
+        )
         {
             var file = e.File;
             if (file != null)
@@ -251,11 +253,13 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 while (totalRead < buffer.Length)
                 {
                     int read = await stream.ReadAsync(buffer, totalRead, buffer.Length - totalRead);
-                    if (read == 0) break;
+                    if (read == 0)
+                        break;
                     totalRead += read;
                 }
                 _file = (file.Name, new BinaryData(buffer), file.ContentType);
-                _imagePreviewUrl = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+                _imagePreviewUrl =
+                    $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
                 StateHasChanged();
             }
         }
