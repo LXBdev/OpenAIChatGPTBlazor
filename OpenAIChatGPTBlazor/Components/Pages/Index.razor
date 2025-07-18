@@ -97,10 +97,13 @@
             <button id="searchBtn" class="btn btn-success" @onclick="OnSearchClick" type="submit" disabled=@_loading>
                 <i class="fas"></i>Submit
             </button>
-            <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled="@(!_loading)">
+            <label class="btn btn-primary mb-0 ms-2" title="Upload image" style="vertical-align: middle; cursor:pointer;">
+                <i class="fas fa-upload"></i>
+                <InputFile OnChange="OnFileSelected" accept="image/*" style="display:none" />
+            </label>
+            <button class="btn btn-danger ms-2" @onclick="OnAbortClick" type="submit" disabled="@(!_loading)">
                 <i class="fas"></i>Abort
             </button>
         </div>
     </div>
 </article>
-
