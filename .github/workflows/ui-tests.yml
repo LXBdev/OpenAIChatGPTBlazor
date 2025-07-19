@@ -39,7 +39,7 @@ jobs:
             ${{ runner.os }}-ms-playwright-
             
       - name: Start Blazor server
-        run: dotnet run --project ./OpenAIChatGPTBlazor/OpenAIChatGPTBlazor.csproj &
+        run: dotnet run --project ./OpenAIChatGPTBlazor/OpenAIChatGPTBlazor.csproj --launch-profile http &
         env:
           OpenAi__DeploymentName: xxxxxxxxxample
           OpenAi__Hint: xxxxxxxxxample
