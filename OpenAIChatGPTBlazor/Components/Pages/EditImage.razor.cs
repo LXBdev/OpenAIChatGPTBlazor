@@ -10,7 +10,7 @@ using OpenAI.Images;
 
 namespace OpenAIChatGPTBlazor.Components.Pages
 {
-    public partial class EditImage : ComponentBase
+    public partial class EditImage : ComponentBase, IAsyncDisposable
     {
         [Inject(Key = "OpenAi_Image")]
         public OpenAIClient OpenAIClient { get; set; } = null!;
@@ -19,12 +19,24 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         private string _warningMessage = string.Empty;
         private bool _loading = false;
         private EditImageOptions _optionsComponent = new();
+        private IJSObjectReference? _module;
 
         private string _prompt = string.Empty;
         private IBrowserFile? _uploadedFile;
         private string? _originalImageDataUrl;
         private string? _editedImageDataUrl;
         private BinaryData? _editedImageData;
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                _module = await JS.InvokeAsync<IJSObjectReference>(
+                    "import",
+                    $"./Components/Pages/EditImage.razor.js?v={DateTime.Now.Ticks}"
+                );
+            }
+        }
 
         private async Task OnFileSelected(InputFileChangeEventArgs e)
         {
@@ -205,11 +217,26 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 var fileName = $"edited_image_{DateTime.Now:yyyyMMdd_HHmmss}.png";
                 var streamRef = new DotNetStreamReference(_editedImageData.ToStream());
 
-                await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+                if (_module is not null)
+                {
+                    await _module.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+                }
+                else
+                {
+                    _warningMessage = "JavaScript module not loaded. Please refresh the page.";
+                }
             }
             catch (Exception ex)
             {
                 _warningMessage = $"Error downloading image: {ex.Message}";
+            }
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (_module is not null)
+            {
+                await _module.DisposeAsync();
             }
         }
     }
