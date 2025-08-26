@@ -39,11 +39,12 @@ jobs:
             ${{ runner.os }}-ms-playwright-
             
       - name: Start Blazor server
-        run: dotnet run --project ./OpenAIChatGPTBlazor/OpenAIChatGPTBlazor.csproj &
+        run: dotnet run --project ./OpenAIChatGPTBlazor/OpenAIChatGPTBlazor.csproj --launch-profile http &
         env:
           OpenAi__DeploymentName: xxxxxxxxxample
           OpenAi__Hint: xxxxxxxxxample
           ConnectionStrings__openAi : Endpoint=https://myoaiservice.openai.azure.com/;Key=xxx;
+          ConnectionStrings__openAi_Image : Endpoint=https://myoaiservice.openai.azure.com/;Key=xxx;
 
       - name: Build Tests
         run: dotnet build ./Tests/UiTests/UiTests.csproj

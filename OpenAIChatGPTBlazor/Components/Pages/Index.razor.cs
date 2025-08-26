@@ -14,11 +14,9 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         private const string SELECTED_MODEL = "SelectedModel";
         private const string IS_AUTOSCROLL_ENABLED = "IsAutoscrollEnabled";
         private const string CHAT_HISTORY = "ChatHistoryV1";
-
         private const string ROLE_SYSTEM = "system";
         private const string ROLE_USER = "user";
         private const string ROLE_ASSISTANT = "assistant";
-
         private List<ChatMessage> _chatMessages = new List<ChatMessage>();
         private CancellationTokenSource? _searchCancellationTokenSource;
         private string _warningMessage = string.Empty;
@@ -29,11 +27,14 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         private ElementReference _nextArea;
         private ElementReference _mainArea;
         private IJSObjectReference? _module;
+        private DotNetObjectReference<Index>? _dotNetHelper;
         private bool _isTopRowToggled;
         private string _additionalTopRowClass = string.Empty;
         private string _SelectedOptionKey = string.Empty;
+        private (string filename, BinaryData data, string mimeType)? _file = null;
+        private string? _imagePreviewUrl;
 
-        [Inject]
+        [Inject(Key = "OpenAi")]
         public OpenAIClient OpenAIClient { get; set; } = null!;
 
         [Inject]
@@ -52,9 +53,10 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         {
             if (firstRender)
             {
+                // Dynamically load JavaScript with cache busting
                 _module = await JS.InvokeAsync<IJSObjectReference>(
                     "import",
-                    "./Components/Pages/Index.razor.js"
+                    $"./Components/Pages/Index.razor.js?v={DateTime.Now.Ticks}"
                 );
                 _SelectedOptionKey =
                     await LocalStorage.GetItemAsync<string>(SELECTED_MODEL) ?? _SelectedOptionKey;
@@ -66,11 +68,34 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 _loading = false;
                 this.StateHasChanged();
                 await _nextArea.FocusAsync();
+
+                // Register paste handler for images
+                _dotNetHelper = DotNetObjectReference.Create(this);
+                if (_module != null)
+                {
+                    await _module.InvokeVoidAsync("registerPasteHandler", _nextArea, _dotNetHelper);
+                }
             }
+
+            // Highlight after load finished to avoid excessive flickering
             if (!_loading)
             {
-                // Highlight after load finished to avoid excessive flickering
                 await JS.InvokeVoidAsync("window.Prism.highlightAll");
+            }
+        }
+
+        async ValueTask IAsyncDisposable.DisposeAsync()
+        {
+            if (_module is not null)
+            {
+                try
+                {
+                    await _module.DisposeAsync();
+                }
+                catch (JSDisconnectedException)
+                {
+                    // Thrown if user reloads the page, can be ignored. JS can't be called after SignalR has been disconnected
+                }
             }
         }
 
@@ -92,13 +117,59 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             }
         }
 
+        private void ToggleTopRow(MouseEventArgs e)
+        {
+            _isTopRowToggled = !_isTopRowToggled;
+            _additionalTopRowClass = _isTopRowToggled ? "show-top-row" : "";
+        }
+
+        private async Task OnSettingsChanged()
+        {
+            await LocalStorage.SetItemAsync<bool>(IS_AUTOSCROLL_ENABLED, _isAutoscrollEnabled);
+            await LocalStorage.SetItemAsync<string>(SELECTED_MODEL, _SelectedOptionKey);
+        }
+
+        [JSInvokable]
+        public Task ReceivePastedImage(string fileName, string base64, string mimeType)
+        {
+            var buffer = Convert.FromBase64String(base64);
+            _file = (fileName, new BinaryData(buffer), mimeType);
+            _imagePreviewUrl = $"data:{mimeType};base64,{base64}";
+            StateHasChanged();
+            return Task.CompletedTask;
+        }
+
+        public void ClearFile()
+        {
+            _file = null;
+            _imagePreviewUrl = null;
+            StateHasChanged();
+        }
+
         private async Task RunSearch()
         {
             try
             {
                 _loading = true;
                 this.StateHasChanged();
-                _chatMessages.Add(new UserChatMessage(_next));
+
+                if (_file == null)
+                {
+                    _chatMessages.Add(new UserChatMessage(_next));
+                }
+                else
+                {
+                    _chatMessages.Add(
+                        new UserChatMessage(
+                            ChatMessageContentPart.CreateTextPart(_next),
+                            ChatMessageContentPart.CreateImagePart(
+                                _file.Value.data,
+                                _file.Value.mimeType
+                            )
+                        )
+                    );
+                    _file = null;
+                }
 
                 _next = string.Empty;
 
@@ -169,6 +240,30 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             }
         }
 
+        private async Task OnFileSelected(
+            Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs e
+        )
+        {
+            var file = e.File;
+            if (file != null)
+            {
+                var buffer = new byte[file.Size];
+                using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+                int totalRead = 0;
+                while (totalRead < buffer.Length)
+                {
+                    int read = await stream.ReadAsync(buffer, totalRead, buffer.Length - totalRead);
+                    if (read == 0)
+                        break;
+                    totalRead += read;
+                }
+                _file = (file.Name, new BinaryData(buffer), file.ContentType);
+                _imagePreviewUrl =
+                    $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+                StateHasChanged();
+            }
+        }
+
         private void AbortSearch()
         {
             try
@@ -215,49 +310,6 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             if (_module is not null)
             {
                 await _module.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
-            }
-        }
-
-        private static string GetChatMessageContent(ChatMessage message)
-        {
-            return message.Content.FirstOrDefault()?.Text ?? "[No Text]";
-        }
-
-        private string GetChatMessageRole(ChatMessage message)
-        {
-            return message switch
-            {
-                SystemChatMessage => ROLE_SYSTEM,
-                UserChatMessage => ROLE_USER,
-                AssistantChatMessage => ROLE_ASSISTANT,
-                _ => "unknown",
-            };
-        }
-
-        private void ToggleTopRow(MouseEventArgs e)
-        {
-            _isTopRowToggled = !_isTopRowToggled;
-            _additionalTopRowClass = _isTopRowToggled ? "show-top-row" : "";
-        }
-
-        private async Task OnSettingsChanged()
-        {
-            await LocalStorage.SetItemAsync<bool>(IS_AUTOSCROLL_ENABLED, _isAutoscrollEnabled);
-            await LocalStorage.SetItemAsync<string>(SELECTED_MODEL, _SelectedOptionKey);
-        }
-
-        async ValueTask IAsyncDisposable.DisposeAsync()
-        {
-            if (_module is not null)
-            {
-                try
-                {
-                    await _module.DisposeAsync();
-                }
-                catch (JSDisconnectedException)
-                {
-                    // Thrown if user reloads the page, can be ignored. JS can't be called after SignalR has been disconnected
-                }
             }
         }
 
@@ -327,6 +379,22 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             }
         }
 
+        private static string GetChatMessageContent(ChatMessage message)
+        {
+            return message.Content.FirstOrDefault()?.Text ?? "[No Text]";
+        }
+
+        private string GetChatMessageRole(ChatMessage message)
+        {
+            return message switch
+            {
+                SystemChatMessage => ROLE_SYSTEM,
+                UserChatMessage => ROLE_USER,
+                AssistantChatMessage => ROLE_ASSISTANT,
+                _ => "unknown",
+            };
+        }
+
         private IList<ChatMessage> JsonToChat(string json)
         {
             List<ChatMessage> result = [];
@@ -345,7 +413,7 @@ namespace OpenAIChatGPTBlazor.Components.Pages
 
             return result;
         }
-    }
 
-    record MyChatMessage(string role, string message);
+        record MyChatMessage(string role, string message);
+    }
 }

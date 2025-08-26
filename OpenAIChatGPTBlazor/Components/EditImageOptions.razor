@@ -1,5 +1,5 @@
-@using Azure.AI.OpenAI
 @using OpenAI.Images
+@using Microsoft.AspNetCore.Components.Forms
 
 <EditForm Model="@this">
     <div class="form-group">
@@ -19,37 +19,42 @@
             </div>
             <div class="col-auto">
                 <InputSelect id="quality" name="quality" @bind-Value="_quality" class="form-select form-select-sm" style="min-width: 90px;">
-                    <option value="auto">Auto</option>
                     <option value="high">High</option>
                     <option value="medium">Medium</option>
                     <option value="low">Low</option>
                 </InputSelect>
             </div>
             <div class="col-auto">
-                <label for="imageCount" class="col-form-label">Image Count</label>
+                <label for="inputFidelity" class="col-form-label">Input Fidelity</label>
             </div>
             <div class="col-auto">
-                <InputNumber id="imageCount" @bind-Value="_imageCount" min="1" max="10" class="form-control form-control-sm" style="width: 70px;" />
+                <InputSelect id="inputFidelity" @bind-Value="_inputFidelity" class="form-select form-select-sm" style="min-width: 100px;">
+                    <option value="standard">Standard</option>
+                    <option value="high">High</option>
+                </InputSelect>
             </div>
         </div>
     </div>
 </EditForm>
 
-
 @code {
     private string _size = "1024x1024";
     private string _quality = "high";
+    private string _inputFidelity = "standard";
 
-    private int _imageCount = 4;
-
-    public int ImageCount => _imageCount;
-
-    public ImageGenerationOptions AsAzureOptions(string deploymentName)
+    public GeneratedImageSize GetImageSize()
     {
-        return new()
-        {
-            Size = new GeneratedImageSize(int.Parse(_size.Split("x")[0]), int.Parse(_size.Split("x")[1])),
-            Quality = new GeneratedImageQuality(_quality)
-        };
+        var parts = _size.Split("x");
+        return new GeneratedImageSize(int.Parse(parts[0]), int.Parse(parts[1]));
+    }
+
+    public GeneratedImageQuality GetImageQuality()
+    {
+        return new GeneratedImageQuality(_quality);
+    }
+
+    public string GetInputFidelity()
+    {
+        return _inputFidelity;
     }
 }

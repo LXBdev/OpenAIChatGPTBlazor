@@ -1,0 +1,93 @@
+@page "/EditImage"
+@rendermode InteractiveServer
+@using System.Globalization
+@using Microsoft.Extensions.Options;
+@using Microsoft.FeatureManagement;
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Forms
+@inject IConfiguration Configuration
+@inject IJSRuntime JS
+@inject IFeatureManager FeatureManager
+@inject IOptionsMonitor<OpenAIOptions> OpenAIOptions
+
+<PageTitle>Image Editor</PageTitle>
+
+<article>
+    <div class="top-row p-4 header justify-content-between">
+        <h4>
+            Image Editor using OpenAI
+        </h4>
+    </div>
+    <div class="row main align-content-start p-4 img-container">
+
+        @if (_loading)
+        {
+            <br />
+            <div class="loader"></div>
+            <p>... please wait ...</p>
+        }
+        @if (_warningMessage.Length > 0)
+        {
+            <div class="alert alert-warning">
+                <strong>Warning!</strong> @_warningMessage.
+            </div>
+        }
+
+        @if (_originalImageDataUrl != null)
+        {
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h6>Original Image:</h6>
+                    <img src="@_originalImageDataUrl" class="img-fluid" style="max-width:400px; max-height:300px; border:1px solid #ccc; border-radius:8px;" />
+                </div>
+            </div>
+        }
+
+        @if (_editedImageDataUrl != null)
+        {
+            <div class="row mb-3">
+                <div class="col-12">
+                    <h6>Edited Image:</h6>
+                    <img src="@_editedImageDataUrl" class="img-fluid" style="max-width:400px; max-height:300px; border:1px solid #ccc; border-radius:8px;" />
+                    <div class="mt-2">
+                        <button class="btn btn-primary btn-sm" @onclick="DownloadEditedImage">
+                            <i class="fas fa-download"></i> Download
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <hr />
+    <div class="row footer">
+        <div class="col-sm-8">
+            <div class="mb-3">
+                <label class="btn btn-outline-primary" style="cursor:pointer;">
+                    <i class="fas fa-upload"></i> Upload Image to Edit
+                    <InputFile OnChange="OnFileSelected" accept="image/*" style="display:none" />
+                </label>
+                @if (_uploadedFile != null)
+                {
+                    <span class="ms-2 text-success">
+                        <i class="fas fa-check"></i> @_uploadedFile.Name uploaded
+                    </span>
+                }
+            </div>
+            <textarea type="text" class="form-control" id="promptArea" placeholder="Enter your editing instructions (e.g., 'Add a sunset in the background', 'Change the color to blue', 'Remove the person from the image')"
+                      @bind="_prompt" @bind:event="oninput" @onkeydown="OnPromptKeydown">
+            </textarea>
+        </div>
+        <br />
+        <div class="col-sm-2">
+            <button id="editBtn" class="btn btn-success" @onclick="OnEditClick" type="submit" disabled="@(_loading || _uploadedFile == null || string.IsNullOrWhiteSpace(_prompt))">
+                <i class="fas fa-edit"></i> Edit Image
+            </button>
+            <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled="@(!_loading)">
+                <i class="fas fa-stop"></i> Abort
+            </button>
+        </div>
+        <div class="col-12 mb-2">
+            <OpenAIChatGPTBlazor.Components.EditImageOptions @ref="_optionsComponent" />
+        </div>
+    </div>
+</article>

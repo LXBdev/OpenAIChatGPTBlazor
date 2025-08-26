@@ -1,4 +1,4 @@
-﻿@page "/GenerateImage"
+@page "/GenerateImage"
 @rendermode InteractiveServer
 @using System.Globalization
 @using Microsoft.Extensions.Options;
@@ -8,7 +8,7 @@
 @inject IFeatureManager FeatureManager
 @inject IOptionsMonitor<OpenAIOptions> OpenAIOptions
 
-<PageTitle>My DALL-E</PageTitle>
+<PageTitle>Image Generation</PageTitle>
 
 <article>
     <div class="top-row p-4 header justify-content-between">
@@ -33,15 +33,36 @@
 
         <p>@_revisedPrompt</p>
 
-        @if (_imageUrl is not null)
+        @if (_imageUrls != null && _imageUrls.Count > 0)
         {
-            <img src="@_imageUrl" class="img-fluid" />
+            <div class="row w-100 g-3">
+                @for (int i = 0; i < _imageUrls.Count; i++)
+                {
+                    <div class="col-12 col-md-6 d-flex justify-content-center align-items-center">
+                        <img src="@_imageUrls[i]" class="img-fluid generated-image" style="cursor:pointer; width:100%; max-width:100%; max-height:80vh; object-fit:contain;" />
+                    </div>
+                }
+            </div>
+        }
+        @if (_imageBytesList != null && _imageBytesList.Count > 0)
+        {
+            <div class="row w-100 g-3">
+                @for (int i = 0; i < _imageBytesList.Count; i++)
+                {
+                    var base64 = System.Convert.ToBase64String(_imageBytesList[i]);
+                    <div class="col-12 col-md-6 d-flex justify-content-center align-items-center">
+                        <img src="data:image/png;base64,@base64" class="img-fluid generated-image" style="cursor:pointer; width:100%; max-width:100%; max-height:80vh; object-fit:contain;" />
+                    </div>
+                }
+            </div>
         }
     </div>
     <hr />
     <div class="row footer">
         <div class="col-sm-8">
-            <GenerateImageOptions @ref="_optionsComponent" />
+            <textarea type="text" class="form-control" id="nextArea" placeholder="CTRL+Enter to submit image generation"
+                      @bind="_prompt" @bind:event="oninput" @onkeydown="OnPromptKeydown">
+            </textarea>
         </div>
         <br />
         <div class="col-sm-2">
@@ -51,6 +72,9 @@
             <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled="@(!_loading)">
                 <i class="fas"></i>Abort
             </button>
+        </div>
+        <div class="col-12 mb-2">
+            <GenerateImageOptions @ref="_optionsComponent" />
         </div>
     </div>
 </article>

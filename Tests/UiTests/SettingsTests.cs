@@ -30,8 +30,9 @@ public class SettingsTests : PageTest
 
         // When
         await Page.ClickAsync("#isAutoscrollEnabled");
+
         await Page.WaitForFunctionAsync(
-            $"() => localStorage.getItem('IsAutoscrollEnabled') !== '{checkedBefore}'"
+            "() => localStorage.getItem('IsAutoscrollEnabled') === 'false'"
         );
 
         // Then
@@ -55,7 +56,7 @@ public class SettingsTests : PageTest
         // When setting is changed and page reloaded
         await Page.ClickAsync("#isAutoscrollEnabled");
         await Page.WaitForFunctionAsync(
-            $"() => localStorage.getItem('IsAutoscrollEnabled') !== 'true'"
+            "() => localStorage.getItem('IsAutoscrollEnabled') === 'false'"
         );
         await Page.ReloadAsync();
 
