@@ -1,47 +1,82 @@
 @using OpenAIChatGPTBlazor.Services.Models
 
-<div class="video-options">
+<EditForm Model="@this">
     <div class="form-group">
-        <label for="width" class="form-label">Width</label>
-        <select id="width" class="form-select" @bind="Width">
-            <option value="480">480px</option>
-            <option value="720">720px</option>
-            <option value="1024">1024px</option>
-            <option value="1280">1280px</option>
-            <option value="1920">1920px</option>
-        </select>
+        <div class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label for="width" class="col-form-label">Width</label>
+            </div>
+            <div class="col-auto">
+                <select id="width" class="form-select form-select-sm" style="min-width: 120px;" @onchange="OnWidthChange">
+                    <option value="480" selected="@(Width == 480)">480px</option>
+                    <option value="720" selected="@(Width == 720)">720px</option>
+                    <option value="1024" selected="@(Width == 1024)">1024px</option>
+                    <option value="1280" selected="@(Width == 1280)">1280px</option>
+                    <option value="1920" selected="@(Width == 1920)">1920px</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label for="height" class="col-form-label">Height</label>
+            </div>
+            <div class="col-auto">
+                <select id="height" class="form-select form-select-sm" style="min-width: 120px;" @onchange="OnHeightChange">
+                    <option value="480" selected="@(Height == 480)">480px</option>
+                    <option value="720" selected="@(Height == 720)">720px</option>
+                    <option value="1024" selected="@(Height == 1024)">1024px</option>
+                    <option value="1280" selected="@(Height == 1280)">1280px</option>
+                    <option value="1920" selected="@(Height == 1920)">1920px</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label for="nSeconds" class="col-form-label">Duration</label>
+            </div>
+            <div class="col-auto">
+                <select id="nSeconds" class="form-select form-select-sm" style="min-width: 120px;" @onchange="OnNSecondsChange">
+                    <option value="3" selected="@(NSeconds == 3)">3 seconds</option>
+                    <option value="5" selected="@(NSeconds == 5)">5 seconds</option>
+                    <option value="10" selected="@(NSeconds == 10)">10 seconds</option>
+                    <option value="15" selected="@(NSeconds == 15)">15 seconds</option>
+                    <option value="20" selected="@(NSeconds == 20)">20 seconds</option>
+                </select>
+            </div>
+        </div>
     </div>
-
-    <div class="form-group">
-        <label for="height" class="form-label">Height</label>
-        <select id="height" class="form-select" @bind="Height">
-            <option value="480">480px</option>
-            <option value="720">720px</option>
-            <option value="1024">1024px</option>
-            <option value="1280">1280px</option>
-            <option value="1920">1920px</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label for="nSeconds" class="form-label">Duration (seconds)</label>
-        <select id="nSeconds" class="form-select" @bind="NSeconds">
-            <option value="3">3 seconds</option>
-            <option value="5">5 seconds</option>
-            <option value="10">10 seconds</option>
-            <option value="15">15 seconds</option>
-            <option value="20">20 seconds</option>
-        </select>
-    </div>
-</div>
+</EditForm>
 
 @code {
-    [Parameter] public int Width { get; set; } = 480;
+    [Parameter] public int Width { get; set; }
     [Parameter] public EventCallback<int> WidthChanged { get; set; }
 
-    [Parameter] public int Height { get; set; } = 480;
+    [Parameter] public int Height { get; set; }
     [Parameter] public EventCallback<int> HeightChanged { get; set; }
 
-    [Parameter] public int NSeconds { get; set; } = 5;
+    [Parameter] public int NSeconds { get; set; }
     [Parameter] public EventCallback<int> NSecondsChanged { get; set; }
+
+    private async Task OnWidthChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var width))
+        {
+            Width = width;
+            await WidthChanged.InvokeAsync(Width);
+        }
+    }
+
+    private async Task OnHeightChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var height))
+        {
+            Height = height;
+            await HeightChanged.InvokeAsync(Height);
+        }
+    }
+
+    private async Task OnNSecondsChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var nSeconds))
+        {
+            NSeconds = nSeconds;
+            await NSecondsChanged.InvokeAsync(NSeconds);
+        }
+    }
 }

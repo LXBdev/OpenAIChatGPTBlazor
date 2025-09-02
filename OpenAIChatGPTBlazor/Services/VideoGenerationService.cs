@@ -88,7 +88,7 @@ public class VideoGenerationService : IVideoGenerationService
         var baseUrl = endpoint ?? ExtractBaseUrlFromClient();
         var useApiKey = !string.IsNullOrEmpty(key);
 
-        _logger.LogInformation(
+        _logger.LogDebug(
             "Video service configured with {AuthMethod} authentication",
             useApiKey ? "API Key" : "Managed Identity"
         );

@@ -51,34 +51,6 @@
             </div>
         }
 
-        @if (_videoResults != null && _videoResults.Any())
-        {
-            <div class="row w-100 g-3">
-                @for (int i = 0; i < _videoResults.Count; i++)
-                {
-                    var video = _videoResults[i];
-                    <div class="col-12 col-md-6 d-flex flex-column justify-content-center align-items-center">
-                        <video controls class="generated-video" style="width:100%; max-width:100%; max-height:80vh;">
-                            <source src="@video.VideoUrl" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                        <div class="video-info mt-2">
-                            <small class="text-muted">
-                                Duration: @video.Duration.ToString("F1")s | Resolution: @video.Resolution | Format: @video.Format
-                            </small>
-                            <br />
-                            @if (!string.IsNullOrEmpty(video.VideoUrl))
-                            {
-                                <button class="btn btn-sm btn-outline-primary mt-1" @onclick="() => DownloadVideo(video.VideoUrl!, i)">
-                                    <i class="fas fa-download"></i> Download
-                                </button>
-                            }
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-
         @if (_videoBytes != null && _videoBytes.Any())
         {
             <div class="row w-100 g-3">
@@ -86,16 +58,22 @@
                 {
                     var base64 = System.Convert.ToBase64String(_videoBytes[i]);
                     <div class="col-12 col-md-6 d-flex flex-column justify-content-center align-items-center">
-                        <video controls class="generated-video" style="width:100%; max-width:100%; max-height:80vh;">
+                        <video controls class="generated-video" style="width:100%; max-width:100%; max-height:80vh;" preload="metadata" controlslist="noplaybackrate" download>
                             <source src="data:video/mp4;base64,@base64" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                         <div class="video-info mt-2">
-                            <small class="text-muted">Video @(i + 1)</small>
-                            <br />
-                            <button class="btn btn-sm btn-outline-primary mt-1" @onclick="() => DownloadVideoFromBytes(_videoBytes[i], i)">
-                                <i class="fas fa-download"></i> Download
-                            </button>
+                            @if (i < _videoResults.Count)
+                            {
+                                var video = _videoResults[i];
+                                <small class="text-muted">
+                                    Duration: @video.Duration.ToString("F1")s | Resolution: @video.Resolution | Format: @video.Format
+                                </small>
+                            }
+                            else
+                            {
+                                <small class="text-muted">Video @(i + 1)</small>
+                            }
                         </div>
                     </div>
                 }

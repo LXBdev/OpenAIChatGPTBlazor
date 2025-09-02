@@ -6,7 +6,7 @@ using OpenAIChatGPTBlazor.Services.Models;
 
 namespace OpenAIChatGPTBlazor.Components.Pages;
 
-public partial class GenerateVideo
+public partial class GenerateVideo : IDisposable
 {
     private CancellationTokenSource? _cancellationTokenSource;
     private string _warningMessage = string.Empty;
@@ -238,34 +238,17 @@ public partial class GenerateVideo
         }
     }
 
-    private async Task DownloadVideo(string videoUrl, int index)
-    {
-        try
-        {
-            await JS.InvokeVoidAsync("downloadFile", videoUrl, $"generated-video-{index + 1}.mp4");
-        }
-        catch (Exception ex)
-        {
-            _warningMessage = $"Error downloading video: {ex.Message}";
-        }
-    }
-
-    private async Task DownloadVideoFromBytes(byte[] videoBytes, int index)
-    {
-        try
-        {
-            var base64 = Convert.ToBase64String(videoBytes);
-            var dataUrl = $"data:video/mp4;base64,{base64}";
-            await JS.InvokeVoidAsync("downloadFile", dataUrl, $"generated-video-{index + 1}.mp4");
-        }
-        catch (Exception ex)
-        {
-            _warningMessage = $"Error downloading video: {ex.Message}";
-        }
-    }
-
     public void Dispose()
     {
-        _cancellationTokenSource?.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _cancellationTokenSource?.Dispose();
+        }
     }
 }
