@@ -1,0 +1,47 @@
+@using OpenAIChatGPTBlazor.Services.Models
+
+<div class="video-options">
+    <div class="form-group">
+        <label for="width" class="form-label">Width</label>
+        <select id="width" class="form-select" @bind="Width">
+            <option value="480">480px</option>
+            <option value="720">720px</option>
+            <option value="1024">1024px</option>
+            <option value="1280">1280px</option>
+            <option value="1920">1920px</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="height" class="form-label">Height</label>
+        <select id="height" class="form-select" @bind="Height">
+            <option value="480">480px</option>
+            <option value="720">720px</option>
+            <option value="1024">1024px</option>
+            <option value="1280">1280px</option>
+            <option value="1920">1920px</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="nSeconds" class="form-label">Duration (seconds)</label>
+        <select id="nSeconds" class="form-select" @bind="NSeconds">
+            <option value="3">3 seconds</option>
+            <option value="5">5 seconds</option>
+            <option value="10">10 seconds</option>
+            <option value="15">15 seconds</option>
+            <option value="20">20 seconds</option>
+        </select>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Width { get; set; } = 480;
+    [Parameter] public EventCallback<int> WidthChanged { get; set; }
+
+    [Parameter] public int Height { get; set; } = 480;
+    [Parameter] public EventCallback<int> HeightChanged { get; set; }
+
+    [Parameter] public int NSeconds { get; set; } = 5;
+    [Parameter] public EventCallback<int> NSecondsChanged { get; set; }
+}
