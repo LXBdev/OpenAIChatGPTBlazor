@@ -67,16 +67,19 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                     // Read and display the uploaded image (read full stream)
                     using var stream = _uploadedFile.OpenReadStream(maxFileSize);
                     var buffer = new byte[_uploadedFile.Size];
-                    int totalRead = 0;
+                    var totalRead = 0;
                     while (totalRead < buffer.Length)
                     {
-                        int read = await stream.ReadAsync(
+                        var read = await stream.ReadAsync(
                             buffer,
                             totalRead,
                             buffer.Length - totalRead
                         );
                         if (read == 0)
+                        {
                             break;
+                        }
+
                         totalRead += read;
                     }
 
@@ -114,7 +117,9 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         private async Task RunEdit()
         {
             if (_uploadedFile == null || string.IsNullOrWhiteSpace(_prompt))
+            {
                 return;
+            }
 
             try
             {
@@ -129,17 +134,20 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 const long maxFileSize = 50 * 1024 * 1024; // 50 MB
                 using var stream = _uploadedFile.OpenReadStream(maxFileSize);
                 var buffer = new byte[_uploadedFile.Size];
-                int totalRead = 0;
+                var totalRead = 0;
                 while (totalRead < buffer.Length)
                 {
-                    int read = await stream.ReadAsync(
+                    var read = await stream.ReadAsync(
                         buffer,
                         totalRead,
                         buffer.Length - totalRead,
                         _editCancellationTokenSource.Token
                     );
                     if (read == 0)
+                    {
                         break;
+                    }
+
                     totalRead += read;
                 }
                 var imageStream = new System.IO.MemoryStream(buffer);
@@ -210,7 +218,9 @@ namespace OpenAIChatGPTBlazor.Components.Pages
         private async Task DownloadEditedImage()
         {
             if (_editedImageData == null)
+            {
                 return;
+            }
 
             try
             {

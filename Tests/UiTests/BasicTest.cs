@@ -1,4 +1,4 @@
-﻿using Microsoft.Playwright;
+using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
 
@@ -12,15 +12,10 @@ public class BasicTest : PageTest
         Environment.GetEnvironmentVariable("AppUrl") ?? "https://localhost:7128/";
 
     [SetUp]
-    public async Task SetUp()
-    {
-        await Page.GotoAsync(BaseUrl);
-    }
+    public async Task SetUp() => await Page.GotoAsync(BaseUrl);
 
     [Test]
-    public async Task SystemMessageShouldBePreset()
-    {
+    public async Task SystemMessageShouldBePreset() =>
         await Expect(Page.GetByText("You are the assistant of a software engineer"))
             .ToBeVisibleAsync();
-    }
 }
