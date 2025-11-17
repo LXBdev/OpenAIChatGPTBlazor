@@ -4,27 +4,15 @@
     <div class="form-group">
         <div class="row g-2 align-items-center">
             <div class="col-auto">
-                <label for="width" class="col-form-label">Width</label>
+                <label for="resolution" class="col-form-label">Resolution</label>
             </div>
             <div class="col-auto">
-                <select id="width" class="form-select form-select-sm" style="min-width: 120px;" @onchange="OnWidthChange">
-                    <option value="480" selected="@(Width == 480)">480px</option>
-                    <option value="720" selected="@(Width == 720)">720px</option>
-                    <option value="1024" selected="@(Width == 1024)">1024px</option>
-                    <option value="1280" selected="@(Width == 1280)">1280px</option>
-                    <option value="1920" selected="@(Width == 1920)">1920px</option>
-                </select>
-            </div>
-            <div class="col-auto">
-                <label for="height" class="col-form-label">Height</label>
-            </div>
-            <div class="col-auto">
-                <select id="height" class="form-select form-select-sm" style="min-width: 120px;" @onchange="OnHeightChange">
-                    <option value="480" selected="@(Height == 480)">480px</option>
-                    <option value="720" selected="@(Height == 720)">720px</option>
-                    <option value="1024" selected="@(Height == 1024)">1024px</option>
-                    <option value="1280" selected="@(Height == 1280)">1280px</option>
-                    <option value="1920" selected="@(Height == 1920)">1920px</option>
+                <select id="resolution" class="form-select form-select-sm" style="min-width: 180px;" @onchange="OnResolutionChange">
+                    <option value="720x1280" selected="@(Width == 720 && Height == 1280)">720x1280 (Vertical HD)</option>
+                    <option value="1280x720" selected="@(Width == 1280 && Height == 720)">1280x720 (HD Landscape)</option>
+                    <option value="1080x1920" selected="@(Width == 1080 && Height == 1920)">1080x1920 (Vertical FHD)</option>
+                    <option value="1920x1080" selected="@(Width == 1920 && Height == 1080)">1920x1080 (Full HD)</option>
+                    <option value="1024x1024" selected="@(Width == 1024 && Height == 1024)">1024x1024 (Square)</option>
                 </select>
             </div>
             <div class="col-auto">
@@ -32,11 +20,9 @@
             </div>
             <div class="col-auto">
                 <select id="nSeconds" class="form-select form-select-sm" style="min-width: 120px;" @onchange="OnNSecondsChange">
-                    <option value="3" selected="@(NSeconds == 3)">3 seconds</option>
-                    <option value="5" selected="@(NSeconds == 5)">5 seconds</option>
-                    <option value="10" selected="@(NSeconds == 10)">10 seconds</option>
-                    <option value="15" selected="@(NSeconds == 15)">15 seconds</option>
-                    <option value="20" selected="@(NSeconds == 20)">20 seconds</option>
+                    <option value="4" selected="@(NSeconds == 4)">4 seconds</option>
+                    <option value="8" selected="@(NSeconds == 8)">8 seconds</option>
+                    <option value="12" selected="@(NSeconds == 12)">12 seconds</option>
                 </select>
             </div>
         </div>
@@ -53,21 +39,19 @@
     [Parameter] public int NSeconds { get; set; }
     [Parameter] public EventCallback<int> NSecondsChanged { get; set; }
 
-    private async Task OnWidthChange(ChangeEventArgs e)
+    private async Task OnResolutionChange(ChangeEventArgs e)
     {
-        if (int.TryParse(e.Value?.ToString(), out var width))
+        var resolution = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(resolution))
         {
-            Width = width;
-            await WidthChanged.InvokeAsync(Width);
-        }
-    }
-
-    private async Task OnHeightChange(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out var height))
-        {
-            Height = height;
-            await HeightChanged.InvokeAsync(Height);
+            var parts = resolution.Split('x');
+            if (parts.Length == 2 && int.TryParse(parts[0], out var width) && int.TryParse(parts[1], out var height))
+            {
+                Width = width;
+                Height = height;
+                await WidthChanged.InvokeAsync(Width);
+                await HeightChanged.InvokeAsync(Height);
+            }
         }
     }
 

@@ -6,7 +6,7 @@ using OpenAIChatGPTBlazor.Services.Models;
 
 namespace OpenAIChatGPTBlazor.Components.Pages;
 
-public partial class GenerateVideo : IDisposable
+public partial class GenerateVideo : ComponentBase, IDisposable
 {
     private CancellationTokenSource? _cancellationTokenSource;
     private string _warningMessage = string.Empty;
@@ -14,9 +14,9 @@ public partial class GenerateVideo : IDisposable
     private bool _loading = false;
 
     private string _prompt = string.Empty;
-    private int _width = 480;
-    private int _height = 480;
-    private int _nSeconds = 5;
+    private int _width = 720;
+    private int _height = 1280;
+    private int _nSeconds = 4;
 
     private readonly List<VideoGeneration> _videoResults = new();
     private readonly List<byte[]> _videoBytes = new();
@@ -77,7 +77,7 @@ public partial class GenerateVideo : IDisposable
                 Width = _width,
                 Height = _height,
                 NSeconds = _nSeconds,
-                Model = "sora",
+                Model = "sora-2",
             };
 
             // Submit the job
@@ -127,30 +127,38 @@ public partial class GenerateVideo : IDisposable
                 );
                 _jobStatus = statusResponse.Status;
 
-                // Update progress estimation
-                _jobProgress = EstimateProgress(
-                    statusResponse.Status,
-                    attempts,
-                    maxPollingAttempts
-                );
+                // Update progress from API response or estimate
+                _jobProgress = statusResponse.Progress > 0
+                    ? statusResponse.Progress
+                    : EstimateProgress(statusResponse.Status, attempts, maxPollingAttempts);
 
                 StateHasChanged();
 
-                // Check if job completed
-                if (statusResponse.Status == "succeeded")
+                // Check if job completed - new API uses "completed" status
+                if (statusResponse.Status == "succeeded" || statusResponse.Status == "completed")
                 {
+                    // New Sora-2 API: use the job ID directly as the video ID
                     if (statusResponse.Generations != null && statusResponse.Generations.Count > 0)
                     {
+                        // Legacy format with generations array
                         _videoResults.AddRange(statusResponse.Generations);
                         _successMessage =
                             $"Video generation completed successfully! Generated {statusResponse.Generations.Count} video(s).";
-
-                        // Download the videos
                         await RetrieveVideoContent();
                     }
                     else
                     {
-                        _warningMessage = "No video generations found in job result.";
+                        // New format: use job ID directly
+                        var generation = new VideoGeneration
+                        {
+                            GenerationId = statusResponse.JobId,
+                            Duration = double.TryParse(statusResponse.Seconds, out var sec) ? sec : 0,
+                            Resolution = statusResponse.Size ?? "720x1280",
+                            Format = "mp4"
+                        };
+                        _videoResults.Add(generation);
+                        _successMessage = "Video generation completed successfully!";
+                        await RetrieveVideoContent();
                     }
                     return;
                 }

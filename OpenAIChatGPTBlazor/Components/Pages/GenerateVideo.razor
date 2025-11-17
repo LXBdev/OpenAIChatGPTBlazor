@@ -11,96 +11,96 @@
 <article>
     <div class="top-row p-4 header justify-content-between">
         <h4>
-            Welcome to my Video Generation using OpenAI Sora
+        Welcome to my Video Generation using OpenAI Sora-2
         </h4>
     </div>
     <div class="row main align-content-start p-4 video-container">
 
         @if (_loading)
-        {
-            <br />
-            <div class="loader"></div>
-            <p>... please wait ...</p>
+  {
+     <br />
+         <div class="loader"></div>
+    <p>... please wait ...</p>
             @if (!string.IsNullOrEmpty(_currentJobId))
-            {
-                <p>Job ID: @_currentJobId</p>
-                <p>Status: @_jobStatus</p>
-                @if (_jobProgress > 0)
-                {
+ {
+          <p>Job ID: @_currentJobId</p>
+          <p>Status: @_jobStatus</p>
+              @if (_jobProgress > 0)
+   {
                     <div class="progress mb-3">
-                        <div class="progress-bar" role="progressbar" style="width: @(_jobProgress)%" 
-                             aria-valuenow="@_jobProgress" aria-valuemin="0" aria-valuemax="100">
-                            @_jobProgress%
-                        </div>
-                    </div>
-                }
-            }
+         <div class="progress-bar" role="progressbar" style="width: @(_jobProgress)%" 
+          aria-valuenow="@_jobProgress" aria-valuemin="0" aria-valuemax="100">
+       @_jobProgress%
+        </div>
+        </div>
+    }
+    }
         }
 
         @if (_warningMessage.Length > 0)
-        {
+  {
             <div class="alert alert-warning">
-                <strong>Warning!</strong> @_warningMessage.
-            </div>
+    <strong>Warning!</strong> @_warningMessage.
+        </div>
         }
 
-        @if (_successMessage.Length > 0)
+   @if (_successMessage.Length > 0)
         {
-            <div class="alert alert-success">
-                <strong>Success!</strong> @_successMessage.
+       <div class="alert alert-success">
+   <strong>Success!</strong> @_successMessage.
             </div>
-        }
+    }
 
         @if (_videoBytes != null && _videoBytes.Any())
+ {
+  <div class="row w-100 g-3">
+  @for (int i = 0; i < _videoBytes.Count; i++)
+             {
+     var base64 = System.Convert.ToBase64String(_videoBytes[i]);
+       <div class="col-12 col-md-6 d-flex flex-column justify-content-center align-items-center">
+         <video controls class="generated-video" style="width:100%; max-width:100%; max-height:80vh;" preload="metadata" controlslist="noplaybackrate" download>
+        <source src="data:video/mp4;base64,@base64" type="video/mp4">
+           Your browser does not support the video tag.
+         </video>
+            <div class="video-info mt-2">
+    @if (i < _videoResults.Count)
+      {
+        var video = _videoResults[i];
+<small class="text-muted">
+       Duration: @video.Duration.ToString("F1")s | Resolution: @video.Resolution | Format: @video.Format
+       </small>
+   }
+                else
         {
-            <div class="row w-100 g-3">
-                @for (int i = 0; i < _videoBytes.Count; i++)
-                {
-                    var base64 = System.Convert.ToBase64String(_videoBytes[i]);
-                    <div class="col-12 col-md-6 d-flex flex-column justify-content-center align-items-center">
-                        <video controls class="generated-video" style="width:100%; max-width:100%; max-height:80vh;" preload="metadata" controlslist="noplaybackrate" download>
-                            <source src="data:video/mp4;base64,@base64" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                        <div class="video-info mt-2">
-                            @if (i < _videoResults.Count)
-                            {
-                                var video = _videoResults[i];
-                                <small class="text-muted">
-                                    Duration: @video.Duration.ToString("F1")s | Resolution: @video.Resolution | Format: @video.Format
-                                </small>
-                            }
-                            else
-                            {
-                                <small class="text-muted">Video @(i + 1)</small>
-                            }
-                        </div>
-                    </div>
-                }
+          <small class="text-muted">Video @(i + 1)</small>
+  }
+       </div>
+        </div>
+      }
             </div>
         }
     </div>
     <hr />
     <div class="row footer">
         <div class="col-sm-8">
-            <textarea type="text" class="form-control" id="videoPromptArea" placeholder="CTRL+Enter to submit video generation"
-                      @bind="_prompt" @bind:event="oninput" @onkeydown="OnPromptKeydown" rows="3">
-            </textarea>
-            <small class="form-text text-muted">Describe the video you want to generate. Be specific about actions, scenes, and style.</small>
+     <textarea type="text" class="form-control" id="videoPromptArea" placeholder="CTRL+Enter to submit video generation"
+           @bind="_prompt" @bind:event="oninput" @onkeydown="OnPromptKeydown" rows="3">
+        </textarea>
+      <small class="form-text text-muted">Describe the video you want to generate. Be specific about actions, scenes, and style.</small>
         </div>
         <br />
         <div class="col-sm-2">
             <button id="submitBtn" class="btn btn-success" @onclick="OnSubmitClick" type="submit" disabled=@_loading>
-                <i class="fas fa-video"></i> Generate
+  <i class="fas fa-video"></i> Generate
             </button>
-            <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled="@(!_loading)">
-                <i class="fas fa-stop"></i> Abort
-            </button>
+          <button class="btn btn-danger" @onclick="OnAbortClick" type="submit" disabled="@(!_loading)">
+       <i class="fas fa-stop"></i> Abort
+         </button>
         </div>
-        <div class="col-12 mb-2">
+      <div class="col-12 mb-2">
             <GenerateVideoOptions @bind-Width="_width" 
-                                  @bind-Height="_height" 
-                                  @bind-NSeconds="_nSeconds" />
+          @bind-Height="_height" 
+      @bind-NSeconds="_nSeconds" />
         </div>
     </div>
 </article>

@@ -164,12 +164,18 @@ public class VideoGenerationService : IVideoGenerationService
     {
         try
         {
-            var url = $"{_baseUrl}/openai/v1/video/generations/jobs?api-version=preview";
+            var url = $"{_baseUrl}/openai/v1/videos";
 
-            var jsonContent = JsonSerializer.Serialize(
-                request,
-                new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower }
+            var jsonContent = JsonSerializer.Serialize(request);
+
+            _logger.LogInformation(
+                "Sending video generation request. Prompt: {Prompt}, Size: {Size}, Seconds: {Seconds}, Model: {Model}",
+                request.Prompt,
+                request.Size,
+                request.Seconds,
+                request.Model
             );
+            _logger.LogDebug("Request JSON: {Json}", jsonContent);
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Post, url)
             {
@@ -179,22 +185,16 @@ public class VideoGenerationService : IVideoGenerationService
             // Set authentication header based on configuration
             await SetAuthenticationHeaderAsync(httpRequest);
 
-            _logger.LogInformation(
-                "Creating video generation job for prompt: {Prompt}",
-                request.Prompt
-            );
-
             var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
 
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogDebug("Response JSON: {Json}", responseContent);
+
                 var jobResponse = JsonSerializer.Deserialize<VideoJobResponse>(
                     responseContent,
-                    new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-                    }
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
                 );
 
                 _logger.LogInformation(
@@ -231,7 +231,7 @@ public class VideoGenerationService : IVideoGenerationService
     {
         try
         {
-            var url = $"{_baseUrl}/openai/v1/video/generations/jobs/{jobId}?api-version=preview";
+            var url = $"{_baseUrl}/openai/v1/videos/{jobId}";
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
             await SetAuthenticationHeaderAsync(httpRequest);
@@ -241,12 +241,18 @@ public class VideoGenerationService : IVideoGenerationService
             if (response.IsSuccessStatusCode)
             {
                 var responseContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogDebug("Job status response JSON: {Json}", responseContent);
+
                 var statusResponse = JsonSerializer.Deserialize<VideoJobStatusResponse>(
                     responseContent,
-                    new JsonSerializerOptions
-                    {
-                        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-                    }
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+
+                _logger.LogInformation(
+                    "Job {JobId} status: {Status}, Progress: {Progress}%",
+                    jobId,
+                    statusResponse?.Status,
+                    statusResponse?.Progress ?? 0
                 );
 
                 return statusResponse
@@ -280,8 +286,7 @@ public class VideoGenerationService : IVideoGenerationService
     {
         try
         {
-            var url =
-                $"{_baseUrl}/openai/v1/video/generations/{generationId}/content/video?api-version=preview";
+            var url = $"{_baseUrl}/openai/v1/videos/{generationId}/content";
 
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
             await SetAuthenticationHeaderAsync(httpRequest);

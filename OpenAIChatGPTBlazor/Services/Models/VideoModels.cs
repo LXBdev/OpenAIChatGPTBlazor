@@ -9,23 +9,74 @@ public class VideoGenerationRequest
     [JsonPropertyName("prompt")]
     public string Prompt { get; set; } = string.Empty;
 
-    [JsonPropertyName("width")]
-    public int Width { get; set; } = 480;
+    [JsonPropertyName("size")]
+    public string Size { get; set; } = "720x1280";
 
-    [JsonPropertyName("height")]
-    public int Height { get; set; } = 480;
-
-    [JsonPropertyName("n_seconds")]
-    public int NSeconds { get; set; } = 5;
+    [JsonPropertyName("seconds")]
+    public string Seconds { get; set; } = "4";
 
     [JsonPropertyName("model")]
-    public string Model { get; set; } = "sora";
+    public string Model { get; set; } = "sora-2";
+
+    // Helper properties for backwards compatibility (not serialized)
+    [JsonIgnore]
+    public int Width
+    {
+        get => ParseSize().width;
+        set => UpdateSize(value, Height);
+    }
+
+    [JsonIgnore]
+    public int Height
+    {
+        get => ParseSize().height;
+        set => UpdateSize(Width, value);
+    }
+
+    [JsonIgnore]
+    public int NSeconds
+    {
+        get => int.TryParse(Seconds, out var s) ? s : 4;
+        set
+        {
+            // Sora-2 only supports 4, 8, or 12 seconds
+            // Round to nearest supported value
+            if (value <= 4)
+                Seconds = "4";
+            else if (value <= 8)
+                Seconds = "8";
+            else
+                Seconds = "12";
+        }
+    }
+
+    private (int width, int height) ParseSize()
+    {
+        var parts = Size.Split('x');
+        if (
+            parts.Length == 2
+            && int.TryParse(parts[0], out var w)
+            && int.TryParse(parts[1], out var h)
+        )
+        {
+            return (w, h);
+        }
+        return (720, 1280);
+    }
+
+    private void UpdateSize(int width, int height)
+    {
+        Size = $"{width}x{height}";
+    }
 }
 
 public class VideoJobResponse
 {
     [JsonPropertyName("id")]
     public string JobId { get; set; } = string.Empty;
+
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = string.Empty;
 
     [JsonPropertyName("status")]
     public string Status { get; set; } = string.Empty;
@@ -34,9 +85,28 @@ public class VideoJobResponse
     [JsonConverter(typeof(UnixTimestampConverter))]
     public DateTime CreatedAt { get; set; }
 
+    [JsonPropertyName("completed_at")]
+    [JsonConverter(typeof(NullableUnixTimestampConverter))]
+    public DateTime? CompletedAt { get; set; }
+
     [JsonPropertyName("expires_at")]
     [JsonConverter(typeof(NullableUnixTimestampConverter))]
     public DateTime? ExpiresAt { get; set; }
+
+    [JsonPropertyName("model")]
+    public string? Model { get; set; }
+
+    [JsonPropertyName("progress")]
+    public int Progress { get; set; }
+
+    [JsonPropertyName("seconds")]
+    public string? Seconds { get; set; }
+
+    [JsonPropertyName("size")]
+    public string? Size { get; set; }
+
+    [JsonPropertyName("remixed_from_video_id")]
+  public string? RemixedFromVideoId { get; set; }
 
     [JsonPropertyName("error")]
     public VideoError? Error { get; set; }
@@ -77,22 +147,45 @@ public class VideoJobStatusResponse
     [JsonPropertyName("id")]
     public string JobId { get; set; } = string.Empty;
 
-    [JsonPropertyName("status")]
+    [JsonPropertyName("object")]
+    public string Object { get; set; } = string.Empty;
+
+  [JsonPropertyName("status")]
     public string Status { get; set; } = string.Empty;
 
     [JsonPropertyName("created_at")]
     [JsonConverter(typeof(UnixTimestampConverter))]
     public DateTime CreatedAt { get; set; }
 
+    [JsonPropertyName("completed_at")]
+    [JsonConverter(typeof(NullableUnixTimestampConverter))]
+    public DateTime? CompletedAt { get; set; }
+
     [JsonPropertyName("expires_at")]
     [JsonConverter(typeof(NullableUnixTimestampConverter))]
     public DateTime? ExpiresAt { get; set; }
 
-    [JsonPropertyName("generations")]
-    public List<VideoGeneration>? Generations { get; set; }
+    [JsonPropertyName("model")]
+    public string? Model { get; set; }
+
+    [JsonPropertyName("progress")]
+    public int Progress { get; set; }
+
+    [JsonPropertyName("seconds")]
+    public string? Seconds { get; set; }
+
+    [JsonPropertyName("size")]
+    public string? Size { get; set; }
+
+    [JsonPropertyName("remixed_from_video_id")]
+    public string? RemixedFromVideoId { get; set; }
 
     [JsonPropertyName("error")]
     public VideoError? Error { get; set; }
+
+  // Legacy support for old API format
+[JsonPropertyName("generations")]
+  public List<VideoGeneration>? Generations { get; set; }
 }
 
 public enum VideoJobStatus
@@ -217,7 +310,7 @@ public class NullableUnixTimestampConverter : JsonConverter<DateTime?>
 
 public static class VideoDurations
 {
-    public static readonly int[] Options = { 5, 10, 15, 20 };
+    public static readonly int[] Options = { 4, 8, 12 };
 }
 
 public static class VideoStyles
