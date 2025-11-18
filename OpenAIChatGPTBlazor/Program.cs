@@ -35,8 +35,18 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddFeatureManagement();
 builder.Services.Configure<List<OpenAIOptions>>(builder.Configuration.GetSection("OpenAI"));
 
+// Add HttpClient for video generation service
+builder.Services.AddHttpClient<OpenAIChatGPTBlazor.Services.VideoGenerationService>();
+
+// Register video generation service
+builder.Services.AddScoped<
+    OpenAIChatGPTBlazor.Services.IVideoGenerationService,
+    OpenAIChatGPTBlazor.Services.VideoGenerationService
+>();
+
 builder.AddKeyedAzureOpenAIClient("OpenAi");
 builder.AddKeyedAzureOpenAIClient("OpenAi_Image");
+builder.AddKeyedAzureOpenAIClient("OpenAi_Video");
 
 var app = builder.Build();
 

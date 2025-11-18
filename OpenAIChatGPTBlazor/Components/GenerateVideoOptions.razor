@@ -1,0 +1,66 @@
+@using OpenAIChatGPTBlazor.Services.Models
+
+<EditForm Model="@this">
+    <div class="form-group">
+        <div class="row g-2 align-items-center">
+            <div class="col-auto">
+                <label for="resolution" class="col-form-label">Resolution</label>
+            </div>
+            <div class="col-auto">
+                <select id="resolution" class="form-select form-select-sm" style="min-width: 180px;" @onchange="OnResolutionChange">
+                    <option value="720x1280" selected="@(Width == 720 && Height == 1280)">720x1280 (Vertical HD)</option>
+                    <option value="1280x720" selected="@(Width == 1280 && Height == 720)">1280x720 (HD Landscape)</option>
+                    <option value="1080x1920" selected="@(Width == 1080 && Height == 1920)">1080x1920 (Vertical FHD)</option>
+                    <option value="1920x1080" selected="@(Width == 1920 && Height == 1080)">1920x1080 (Full HD)</option>
+                    <option value="1024x1024" selected="@(Width == 1024 && Height == 1024)">1024x1024 (Square)</option>
+                </select>
+            </div>
+            <div class="col-auto">
+                <label for="nSeconds" class="col-form-label">Duration</label>
+            </div>
+            <div class="col-auto">
+                <select id="nSeconds" class="form-select form-select-sm" style="min-width: 120px;" @onchange="OnNSecondsChange">
+                    <option value="4" selected="@(NSeconds == 4)">4 seconds</option>
+                    <option value="8" selected="@(NSeconds == 8)">8 seconds</option>
+                    <option value="12" selected="@(NSeconds == 12)">12 seconds</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public int Width { get; set; }
+    [Parameter] public EventCallback<int> WidthChanged { get; set; }
+
+    [Parameter] public int Height { get; set; }
+    [Parameter] public EventCallback<int> HeightChanged { get; set; }
+
+    [Parameter] public int NSeconds { get; set; }
+    [Parameter] public EventCallback<int> NSecondsChanged { get; set; }
+
+    private async Task OnResolutionChange(ChangeEventArgs e)
+    {
+        var resolution = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(resolution))
+        {
+            var parts = resolution.Split('x');
+            if (parts.Length == 2 && int.TryParse(parts[0], out var width) && int.TryParse(parts[1], out var height))
+            {
+                Width = width;
+                Height = height;
+                await WidthChanged.InvokeAsync(Width);
+                await HeightChanged.InvokeAsync(Height);
+            }
+        }
+    }
+
+    private async Task OnNSecondsChange(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var nSeconds))
+        {
+            NSeconds = nSeconds;
+            await NSecondsChanged.InvokeAsync(NSeconds);
+        }
+    }
+}
