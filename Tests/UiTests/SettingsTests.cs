@@ -1,4 +1,4 @@
-﻿using Microsoft.Playwright;
+using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
 
@@ -40,7 +40,7 @@ public class SettingsTests : PageTest
             "() => localStorage.getItem('IsAutoscrollEnabled')"
         );
         Assert.IsTrue(
-            Boolean.TryParse(storedString, out var storedAfter),
+            bool.TryParse(storedString, out var storedAfter),
             $"{storedString} expected to be a valid bool"
         );
         Assert.AreNotEqual(checkedBefore, storedAfter, "expected changed value");

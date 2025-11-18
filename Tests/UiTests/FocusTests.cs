@@ -1,4 +1,4 @@
-﻿using Microsoft.Playwright;
+using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
 
@@ -9,10 +9,7 @@ namespace UiTests;
 public class FocusTests : PageTest
 {
     [SetUp]
-    public async Task SetUp()
-    {
-        await Page.GotoAsync(BasicTest.BaseUrl);
-    }
+    public async Task SetUp() => await Page.GotoAsync(BasicTest.BaseUrl);
 
     [Test]
     public async Task NextAreaShouldHaveFocusAfterLoading()

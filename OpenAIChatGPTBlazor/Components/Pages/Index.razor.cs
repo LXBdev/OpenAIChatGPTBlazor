@@ -66,7 +66,7 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 await InitiateChat();
 
                 _loading = false;
-                this.StateHasChanged();
+                StateHasChanged();
                 await _nextArea.FocusAsync();
 
                 // Register paste handler for images
@@ -99,15 +99,9 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             }
         }
 
-        private async Task OnSearchClick()
-        {
-            await RunSearch();
-        }
+        private async Task OnSearchClick() => await RunSearch();
 
-        private void OnAbortClick()
-        {
-            AbortSearch();
-        }
+        private void OnAbortClick() => AbortSearch();
 
         private async Task OnNextKeydown(KeyboardEventArgs e)
         {
@@ -151,7 +145,7 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             try
             {
                 _loading = true;
-                this.StateHasChanged();
+                StateHasChanged();
 
                 if (_file == null)
                 {
@@ -198,12 +192,12 @@ namespace OpenAIChatGPTBlazor.Components.Pages
                 if (selectedOption.HasStreamingSupport)
                 {
                     var updates = client.CompleteChatStreamingAsync(_chatMessages);
-                    await foreach (StreamingChatCompletionUpdate update in updates)
+                    await foreach (var update in updates)
                     {
-                        foreach (ChatMessageContentPart updatePart in update.ContentUpdate)
+                        foreach (var updatePart in update.ContentUpdate)
                         {
                             _stream += updatePart.Text;
-                            this.StateHasChanged();
+                            StateHasChanged();
                             if (_isAutoscrollEnabled && _module is not null)
                             {
                                 await _module.InvokeVoidAsync("scrollElementToEnd", _mainArea);
@@ -249,12 +243,15 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             {
                 var buffer = new byte[file.Size];
                 using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-                int totalRead = 0;
+                var totalRead = 0;
                 while (totalRead < buffer.Length)
                 {
-                    int read = await stream.ReadAsync(buffer, totalRead, buffer.Length - totalRead);
+                    var read = await stream.ReadAsync(buffer, totalRead, buffer.Length - totalRead);
                     if (read == 0)
+                    {
                         break;
+                    }
+
                     totalRead += read;
                 }
                 _file = (file.Name, new BinaryData(buffer), file.ContentType);
@@ -282,10 +279,7 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             }
         }
 
-        private void DeleteMessage(ChatMessage chatMessage)
-        {
-            _chatMessages.Remove(chatMessage);
-        }
+        private void DeleteMessage(ChatMessage chatMessage) => _chatMessages.Remove(chatMessage);
 
         private async void CopyMessageToNext(ChatMessage chatMessage)
         {
@@ -295,7 +289,7 @@ namespace OpenAIChatGPTBlazor.Components.Pages
 
         private async Task DownloadConversation()
         {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            var sb = new System.Text.StringBuilder();
             sb.AppendLine("# ChatGPT Conversation");
             foreach (var message in _chatMessages)
             {
@@ -379,21 +373,17 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             }
         }
 
-        private static string GetChatMessageContent(ChatMessage message)
-        {
-            return message.Content.FirstOrDefault()?.Text ?? "[No Text]";
-        }
+        private static string GetChatMessageContent(ChatMessage message) =>
+            message.Content.FirstOrDefault()?.Text ?? "[No Text]";
 
-        private string GetChatMessageRole(ChatMessage message)
-        {
-            return message switch
+        private string GetChatMessageRole(ChatMessage message) =>
+            message switch
             {
                 SystemChatMessage => ROLE_SYSTEM,
                 UserChatMessage => ROLE_USER,
                 AssistantChatMessage => ROLE_ASSISTANT,
                 _ => "unknown",
             };
-        }
 
         private IList<ChatMessage> JsonToChat(string json)
         {
@@ -414,6 +404,6 @@ namespace OpenAIChatGPTBlazor.Components.Pages
             return result;
         }
 
-        record MyChatMessage(string role, string message);
+        private record MyChatMessage(string role, string message);
     }
 }
