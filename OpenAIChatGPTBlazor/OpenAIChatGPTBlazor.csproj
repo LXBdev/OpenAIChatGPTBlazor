@@ -10,7 +10,7 @@
     <PackageReference Include="Aspire.Azure.AI.OpenAI" Version="9.5.2-preview.1.25522.3" />
     <PackageReference Include="Azure.Identity" Version="1.17.0" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
-    <PackageReference Include="Markdig" Version="0.41.3" />
+    <PackageReference Include="Markdig" Version="0.44.0" />
     <PackageReference Include="Microsoft.Azure.AppConfiguration.AspNetCore" Version="8.2.0" />
     <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="4.2.1" />
     <PackageReference Include="Microsoft.Web.LibraryManager.Build" Version="2.1.175" />
